@@ -1,8 +1,7 @@
 '''
 Worked @ Insight Data Science
 Wed Jan 15 10:55:41 2020
-'''
-
+''' 
 
 import pandas as pd
 
@@ -14,13 +13,14 @@ class MedicalData:
     class QuestionPair:
         def __init__(self, id, question, answer, qtype):
             self._id = id 
-            self._questions =  question 
-            self._answers   =  answer 
+            self._question  =  question 
+            self._answer    =  answer 
             self._qtype = qtype 
 
 
     def __init__(self):
         self._qa_pair = [] # list of question answer pair 
+        self._test_conds = {} 
 
     def dissect(self):
         print("# of qa pairs: %d" %len(self._qa_pair))
@@ -72,18 +72,25 @@ class MedicalData:
 
         args:
             path_to_file: path to the excel file
+            is_debug: decide whether debug or not.
+                      For unittest, it should be turn True
         """
 
         try:
             o_excel_data = pd.ExcelFile(path_to_file)
-            if "Drug_QA" in o_excel_data.sheet_names:
-                df_drug_qa = o_excel_file.parse("DrugQA")
+            t_sheets = o_excel_data.sheet_names
+            if "DrugQA" in t_sheets:
+                df_drug_qa = o_excel_data.parse("DrugQA")
+                self.parse_drug_qa_from_excel(df_drug_qa, is_debug)
             elif "QS" in o_excel_data.sheet_names:
-
+                print("Not yet decided")
+            else:
+                print("not sure ")
 
         except IOError:
+            print("[WARN]: not found %s" %path_to_file) 
 
-    def parse_drug_qa_from_excel(self, df_drug_qa):
+    def parse_drug_qa_from_excel(self, df_drug_qa, is_debug = False):
         """
         parse a data frame read from excel file 
 
@@ -91,11 +98,11 @@ class MedicalData:
             df_drug_qa: dataframe containing the drug related 
                         question answering 
         """
-        if df_drug_qa.empty(): return 
-
         for index, row in df_drug_qa.iterrows():
-            print(row['Question'], row['Answer'])
-
+            o_qa = self.QuestionPair("", row['Question'], row['Answer'], row['Question Type'])
+            self._qa_pair.append(o_qa)
+            if is_debug and index == 5: 
+                self._test_conds['excel_parser'] = o_qa 
 
                     
     def tokenize(self, is_word=True): 
