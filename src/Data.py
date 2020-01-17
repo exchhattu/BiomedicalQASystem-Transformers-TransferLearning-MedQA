@@ -2,6 +2,10 @@
 Worked @ Insight Data Science
 Wed Jan 15 10:55:41 2020
 '''
+
+
+import pandas as pd
+
 import xml.dom.minidom
 import xml.etree.ElementTree as etree 
 
@@ -61,6 +65,38 @@ class MedicalData:
 
         if is_debug:
             self.dissect()
+
+    def parse_excel_file(self, path_to_file, is_debug=False):
+        """
+        read a excel file in order 
+
+        args:
+            path_to_file: path to the excel file
+        """
+
+        try:
+            o_excel_data = pd.ExcelFile(path_to_file)
+            if "Drug_QA" in o_excel_data.sheet_names:
+                df_drug_qa = o_excel_file.parse("DrugQA")
+            elif "QS" in o_excel_data.sheet_names:
+
+
+        except IOError:
+
+    def parse_drug_qa_from_excel(self, df_drug_qa):
+        """
+        parse a data frame read from excel file 
+
+        args:
+            df_drug_qa: dataframe containing the drug related 
+                        question answering 
+        """
+        if df_drug_qa.empty(): return 
+
+        for index, row in df_drug_qa.iterrows():
+            print(row['Question'], row['Answer'])
+
+
                     
     def tokenize(self, is_word=True): 
         """
