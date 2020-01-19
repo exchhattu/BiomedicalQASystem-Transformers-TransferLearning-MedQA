@@ -11,11 +11,12 @@ import xml.etree.ElementTree as etree
 class MedicalData: 
 
     class QuestionPair:
-        def __init__(self, id, question, answer, qtype):
+        def __init__(self, id, question, answer, qtype, keyword):
             self._id = id 
             self._question  =  question 
             self._answer    =  answer 
             self._qtype = qtype 
+            self._keyword = keyword
 
 
     def __init__(self):
@@ -60,7 +61,7 @@ class MedicalData:
                     for attrib in q_data.attrib.keys():
                         if attrib == "qtype":
                             s_qtype = q_data.attrib[attrib]
-                    o_qa = self.QuestionPair("", s_question, s_answer, s_qtype)
+                    o_qa = self.QuestionPair("", s_question, s_answer, s_qtype, "")
                     self._qa_pair.append(o_qa)
 
         if is_debug:
@@ -99,7 +100,10 @@ class MedicalData:
                         question answering 
         """
         for index, row in df_drug_qa.iterrows():
-            o_qa = self.QuestionPair("", row['Question'], row['Answer'], row['Question Type'])
+            o_qa = self.QuestionPair("", row['Question'], 
+                                     row['Answer'], 
+                                     row['Question Type'], 
+                                     row['Focus (Drug)'])
             self._qa_pair.append(o_qa)
             if is_debug and index == 5: 
                 self._test_conds['excel_parser'] = o_qa 
