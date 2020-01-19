@@ -33,5 +33,10 @@ def test_xml_parser():
     ## Case3 - split a string and count # of words
     assert len(o_qa_result._answer.split())== 53
 
+    ## Case4 - keyword
+    assert o_qa_result._keyword=="desonide ointment" 
+
+    print("Passed excel parsing.")
+
 # call test cases
 test_xml_parser()
