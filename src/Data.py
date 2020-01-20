@@ -13,6 +13,10 @@ import xml.etree.ElementTree as etree
 
 # data science/AI
 import pandas as pd
+from DataEncode import InputData 
+import torch
+from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
+                              TensorDataset)
 
 
 class MedicalData: 
@@ -25,21 +29,71 @@ class MedicalData:
             self._qtype = qtype 
             self._keyword = keyword
 
-        def put_context(self, answer_start, context):
+        def put_context(self, answer_start, context, is_impossible):
             """
             set context and corresponding answer position 
             params:
                 answer_start: position of answer in context
                 context: context text mostly paragraph
             """
-
             self._answer_start = answer_start
             self._context = context
+            self._is_impossible = is_impossible
 
+        def update(self, length, start_position, end_position, doc_tokens):
+            """
+            Udpate some values after parsing paragraph
+            def update(self, length, end_length, docs):
+            """
+            self._length = length
+            self._start_position = start_position 
+            self._end_position = end_position
+            self._doc_tokens = doc_tokens
 
     def __init__(self):
         self._qa_pair = [] # list of question answer pair 
         self._test_conds = {} 
+
+    def test(self):
+        idata = InputData()
+        t_features = []
+        for o_qa in self._qa_pair:
+            idata.clean_input(o_qa)
+            t_features.append(idata.tokenize_input(o_qa))
+            self._convert_features_to_dataset(t_features)
+            break
+
+    def _convert_features_to_dataset(self, t_features): 
+        print(len(t_features))
+        t_input_ids = []
+        t_input_masks = []
+        t_segment_ids = []
+        t_cls_idxs = []
+        t_p_mask = []
+        t_st_pos = []
+        t_ed_pos = []
+
+        for o_feature in t_features: 
+            f_input_id, f_input_mask, f_segment_id, f_cls_idx, f_p_mask, f_st_pos, f_ed_pos = o_feature 
+            t_input_ids.append(f_input_id)
+            t_input_masks.append(f_input_mask)
+            t_segment_ids.append(f_segment_id)
+            t_cls_idxs.append(f_cls_idx)
+            t_p_mask.append(f_p_mask)
+            t_st_pos.append(f_st_pos)
+            t_ed_pos.append(f_ed_pos)
+
+        te_input_ids    = torch.tensor(t_input_ids, dtype=torch.long)
+        te_input_masks  = torch.tensor(t_input_masks, dtype=torch.long)
+        te_segment_ids  = torch.tensor(t_segment_ids, dtype=torch.long)
+        te_cls_idx      = torch.tensor(t_cls_idxs, dtype=torch.long)
+        te_p_mask       = torch.tensor(t_p_mask, dtype=torch.float)
+        te_st_pos       = torch.tensor(t_st_pos, dtype=torch.long)
+        te_ed_pos       = torch.tensor(t_ed_pos, dtype=torch.long)
+
+        dataset = TensorDataset(te_input_ids, te_input_masks, te_segment_ids,
+                                te_st_pos, te_ed_pos, te_cls_idx, te_p_mask)
+
 
     def dissect(self):
         print("# of qa pairs: %d" %len(self._qa_pair))
@@ -166,7 +220,7 @@ class MedicalData:
 
         # create question answer object
         o_qap = self.QuestionPair(s_id, s_question, s_answer, "", "")
-        o_qap.put_context(i_answer_start, s_context)
+        o_qap.put_context(i_answer_start, s_context, False)
         self._qa_pair.append(o_qap) 
 
     def parse_json_file(self, path_to_file, is_debug=False):
