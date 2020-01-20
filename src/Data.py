@@ -192,6 +192,60 @@ class MedicalData:
         except IOError:
             print("[WARN]: not found %s" %path_to_file) 
 
+    def get_answer(self, qa_pair):
+        """
+        get answer for qa_pair
+
+        params:
+            qa_pair: qa_pair object 
+        """
+        # answer
+        answers = []
+        d_answer = {'text':  qa_pair._answer,  
+                    'answer_start': qa_pair._answer_start}
+        answers.append(d_answer)
+        return answers
+
+    def get_question(self, qa_pair):
+        """
+        get quesion with other properties such as id,
+        is_impossible
+
+        param:
+            qa_pair: object of class QuestionPair
+        """
+        t_qas = []
+        d_qas = { 'id': "NA",
+                  'is_impossible': False,
+                  'question': qa_pair._question, 
+                  'answer': self.get_answer(qa_pair)
+                }
+        t_qas.append(d_qas)
+        return t_qas
+
+
+    def write_json_file(self, path_to_file, file_name = "train.json", is_debug=False):
+        """
+        make json format of qa data and dump into a given file path
+
+        param:
+            path_to_file: path to a file 
+            is_debug: for testing purpose
+        """
+        # create a dictionary to dump as json 
+        t_data = []
+        for qa_pair in self._qa_pair:
+            # qas 
+            d_data = { 'context': qa_pair._context, 
+                       'qas': self.get_question(qa_pair) }
+            t_data.append(d_data)            
+
+        # Save as a JSON file
+        full_path = os.path.join(path_to_file, file_name)
+        with open(full_path, 'w') as f:
+            json.dump(t_data, f)
+
+
     def tokenize(self, is_word=True): 
         """
         Sentences is tokenized based on the input given
