@@ -3,10 +3,17 @@ Worked @ Insight Data Science
 Wed Jan 15 10:55:41 2020
 ''' 
 
-import pandas as pd
+# python
+import os
 
+# parser
+import json 
 import xml.dom.minidom
 import xml.etree.ElementTree as etree 
+
+# data science/AI
+import pandas as pd
+
 
 class MedicalData: 
 
@@ -18,6 +25,17 @@ class MedicalData:
             self._qtype = qtype 
             self._keyword = keyword
 
+        def put_context(self, answer_start, context):
+            """
+            set context and corresponding answer position 
+            params:
+                answer_start: position of answer in context
+                context: context text mostly paragraph
+            """
+
+            self._answer_start = answer_start
+            self._context = context
+
 
     def __init__(self):
         self._qa_pair = [] # list of question answer pair 
@@ -25,6 +43,26 @@ class MedicalData:
 
     def dissect(self):
         print("# of qa pairs: %d" %len(self._qa_pair))
+
+    def parse_xmls(self, s_path_to_dir, is_debug=False):
+        """
+        scan all parse XML files from directory and pass
+        them for parsing
+
+        params:
+            s_path_to_dir: path to a directory
+            is_debug: allow debug mostly testing
+        """
+       
+        i_counter= 0 
+        t_files =  os.listdir(s_path_to_dir)
+        for s_file_name in t_files: 
+            if s_file_name.endswith(".xml"): 
+                s_path_to_file = os.path.join(s_path_to_dir, s_file_name) 
+                self.parse_xml_input(s_path_to_file, is_debug)
+                i_counter += 1 
+        print("INFO: %d files was/were parsed." %i_counter)
+        if is_debug: return i_counter
 
 
 
@@ -36,17 +74,17 @@ class MedicalData:
         params:
           s_path_to_file: path to XML file
         """
-        # o_xml_doc = xml.dom.minidom.parse(s_path_to_file)
 
         # create element tree object 
         o_xml_tree = etree.parse(s_path_to_file) 
         # get root element 
         o_root = o_xml_tree.getroot() 
-        print(o_root.tag)
-        
-        # create empty list for news items 
-        newsitems = [] 
-                                   
+       
+
+        q_focuses = o_root.findall('Focus')
+        s_focus = ""
+        for q_focus in q_focuses: 
+            s_focus = s_focus + ";" + q_focus.text
         # iterate news items 
         for q_pairs in o_root.findall('QAPairs'):
             for q_pair in q_pairs: # QApair  
@@ -61,7 +99,7 @@ class MedicalData:
                     for attrib in q_data.attrib.keys():
                         if attrib == "qtype":
                             s_qtype = q_data.attrib[attrib]
-                    o_qa = self.QuestionPair("", s_question, s_answer, s_qtype, "")
+                    o_qa = self.QuestionPair("", s_question, s_answer, s_qtype, s_focus)
                     self._qa_pair.append(o_qa)
 
         if is_debug:
@@ -84,9 +122,9 @@ class MedicalData:
                 df_drug_qa = o_excel_data.parse("DrugQA")
                 self.parse_drug_qa_from_excel(df_drug_qa, is_debug)
             elif "QS" in o_excel_data.sheet_names:
-                print("Not yet decided")
+                print("QS is not included")
             else:
-                print("not sure ")
+                print("[WARN] not found excel sheet")
 
         except IOError:
             print("[WARN]: not found %s" %path_to_file) 
@@ -108,7 +146,52 @@ class MedicalData:
             if is_debug and index == 5: 
                 self._test_conds['excel_parser'] = o_qa 
 
-                    
+    def extract_put_qas(self, qas):
+        """
+        parse nested dictionary 
+
+        params: 
+            qas: question answer data
+        """
+        o_qa        = qas["qas"][0]
+        s_id        = o_qa["id"]
+        s_question  = o_qa["question"]
+        # answers has two keys - text and answer_start in the context
+        o_answers       = o_qa["answers"]
+        s_answer        = o_answers[0]["text"]
+        i_answer_start  = o_answers[0]["answer_start"]
+
+        # next key of qas is context
+        s_context       = qas["context"]
+
+        # create question answer object
+        o_qap = self.QuestionPair(s_id, s_question, s_answer, "", "")
+        o_qap.put_context(i_answer_start, s_context)
+        self._qa_pair.append(o_qap) 
+
+    def parse_json_file(self, path_to_file, is_debug=False):
+        """
+        parse json file especially from BioASQ
+
+        params:
+            path_to_file: path to json file
+            is_debug: turn on while testing or development
+        """
+
+        try:
+            with open(path_to_file) as oj_fjson:
+                dc_data = json.load(oj_fjson)
+            oj_fjson.close()
+            
+            # Looking smart way to parse
+            d_para = dc_data['data'][0]
+            # qas and context are extracted.
+            for d_qass in d_para['paragraphs']:
+                self.extract_put_qas(d_qass)
+            if is_debug: return len(self._qa_pair)
+        except IOError:
+            print("[WARN]: not found %s" %path_to_file) 
+
     def tokenize(self, is_word=True): 
         """
         Sentences is tokenized based on the input given
