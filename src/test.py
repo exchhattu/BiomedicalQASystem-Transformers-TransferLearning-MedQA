@@ -4,6 +4,7 @@ Wed Jan 15 11:38:19 2020
 
 Test cases
 '''
+import os
 
 from Data import MedicalData 
 
@@ -47,6 +48,9 @@ def test_json_parser():
     num_qas = o_mdata.parse_json_file("./unittest/test3_json/BioASQ_factoid-6b.json", True)
     assert num_qas == 4772
     print("Passed json parsing.")
+
+    o_mdata.write_json_file(os.getcwd(), file_name = "train.json")
+    assert os.path.exists(os.path.join(os.getcwd(), "train.json")) == True
 
 # call test cases
 test_xml_parser()
