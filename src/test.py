@@ -13,8 +13,12 @@ def test_xml_parser():
     o_mdata.parse_xml_input("./unittest/test1/0000001.xml", \
                             is_debug=True)
 
+    icount = o_mdata.parse_xmls("./unittest/test1/", True)
+    assert icount == 3
+
     # parsing excel file
-    o_mdata.parse_excel_file("./unittest/test2/test_MedInfo2019-QA-Medications.xlsx", True)
+    o_mdata.parse_excel_file("./unittest/test2/test_MedInfo2019-QA-Medications.xlsx", 
+                             True)
 
     # result
     o_qa_result = o_mdata._test_conds['excel_parser'] 
@@ -38,5 +42,12 @@ def test_xml_parser():
 
     print("Passed excel parsing.")
 
+def test_json_parser():
+    o_mdata = MedicalData()
+    num_qas = o_mdata.parse_json_file("./unittest/test3_json/BioASQ_factoid-6b.json", True)
+    assert num_qas == 4772
+    print("Passed json parsing.")
+
 # call test cases
 test_xml_parser()
+test_json_parser()
