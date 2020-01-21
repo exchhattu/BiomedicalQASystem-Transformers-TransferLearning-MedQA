@@ -60,11 +60,10 @@ class MedicalData:
         for o_qa in self._qa_pair:
             idata.clean_input(o_qa)
             t_features.append(idata.tokenize_input(o_qa))
-            self._convert_features_to_dataset(t_features)
             break
+        return self._convert_features_to_dataset(t_features)
 
     def _convert_features_to_dataset(self, t_features): 
-        print(len(t_features))
         t_input_ids = []
         t_input_masks = []
         t_segment_ids = []
@@ -93,6 +92,7 @@ class MedicalData:
 
         dataset = TensorDataset(te_input_ids, te_input_masks, te_segment_ids,
                                 te_st_pos, te_ed_pos, te_cls_idx, te_p_mask)
+        return dataset
 
 
     def dissect(self):
