@@ -7,6 +7,7 @@ Test cases
 import os
 
 from Data import MedicalData 
+from QADataModel import QaDataModel
 
 def test_xml_parser():
     o_mdata = MedicalData()
@@ -52,6 +53,15 @@ def test_json_parser():
     o_mdata.write_json_file(os.getcwd(), file_name = "train.json")
     assert os.path.exists(os.path.join(os.getcwd(), "train.json")) == True
 
+    dataset = o_mdata.test()
+    qmodel = QaDataModel(dataset)
+
+def test_QA_dmodel():
+    qmodel = QaDataModel()
+
 # call test cases
 test_xml_parser()
 test_json_parser()
+# test_QA_dmodel()
+
+
