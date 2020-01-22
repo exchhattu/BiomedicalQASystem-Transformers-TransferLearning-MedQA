@@ -40,6 +40,18 @@ class MedicalData:
             self._context = context
             self._is_impossible = is_impossible
 
+        def update_question(self, length, num_token):
+            self._length = length 
+            self._num_token = num_token
+
+        def update_context(self, length, num_token):
+            self._length = length 
+            self._num_token = num_token
+
+        def update_answer(self, length, num_token):
+            self._length = length 
+            self._num_token = num_token
+
         def update(self, length, start_position, end_position, doc_tokens):
             """
             Udpate some values after parsing paragraph
@@ -61,7 +73,7 @@ class MedicalData:
             idata.clean_input(o_qa)
             t_features.append(idata.tokenize_input(o_qa))
             break
-        return self._convert_features_to_dataset(t_features)
+        return self._convert_features_to_dataset(t_features), self._qa_pair
 
     def _convert_features_to_dataset(self, t_features): 
         t_input_ids = []
@@ -71,8 +83,9 @@ class MedicalData:
         t_p_mask = []
         t_st_pos = []
         t_ed_pos = []
+        t_example_idx = []
 
-        for o_feature in t_features: 
+        for example_index, o_feature in enumerate(t_features): 
             f_input_id, f_input_mask, f_segment_id, f_cls_idx, f_p_mask, f_st_pos, f_ed_pos = o_feature 
             t_input_ids.append(f_input_id)
             t_input_masks.append(f_input_mask)
@@ -81,6 +94,7 @@ class MedicalData:
             t_p_mask.append(f_p_mask)
             t_st_pos.append(f_st_pos)
             t_ed_pos.append(f_ed_pos)
+            t_example_idx.append(example_index)
 
         te_input_ids    = torch.tensor(t_input_ids, dtype=torch.long)
         te_input_masks  = torch.tensor(t_input_masks, dtype=torch.long)
@@ -89,9 +103,12 @@ class MedicalData:
         te_p_mask       = torch.tensor(t_p_mask, dtype=torch.float)
         te_st_pos       = torch.tensor(t_st_pos, dtype=torch.long)
         te_ed_pos       = torch.tensor(t_ed_pos, dtype=torch.long)
+        te_ed_pos       = torch.tensor(t_ed_pos, dtype=torch.long)
+        te_example_idx  = torch.tensor(t_example_idx, dtype=torch.long) 
 
         dataset = TensorDataset(te_input_ids, te_input_masks, te_segment_ids,
-                                te_st_pos, te_ed_pos, te_cls_idx, te_p_mask)
+                                te_st_pos, te_ed_pos, te_cls_idx, te_p_mask,
+                                te_example_idx)
         return dataset
 
 
@@ -117,8 +134,6 @@ class MedicalData:
                 i_counter += 1 
         print("INFO: %d files was/were parsed." %i_counter)
         if is_debug: return i_counter
-
-
 
     def parse_xml_input(self, s_path_to_file, is_debug=False):
         """
@@ -207,16 +222,19 @@ class MedicalData:
         params: 
             qas: question answer data
         """
-        o_qa        = qas["qas"][0]
-        s_id        = o_qa["id"]
-        s_question  = o_qa["question"]
-        # answers has two keys - text and answer_start in the context
-        o_answers       = o_qa["answers"]
-        s_answer        = o_answers[0]["text"]
-        i_answer_start  = o_answers[0]["answer_start"]
-
         # next key of qas is context
         s_context       = qas["context"]
+       
+        # Some multiple question can be there for single passage
+        for o_qa in qas["qas"]:
+            s_id        = o_qa["id"]
+            s_question  = o_qa["question"]
+            b_is_impossible = False
+            # answers has two keys - text and answer_start in the context
+            o_answers       = o_qa["answers"]
+            s_answer        = o_answers[0]["text"]
+            i_answer_start  = o_answers[0]["answer_start"]
+
 
         # create question answer object
         o_qap = self.QuestionPair(s_id, s_question, s_answer, "", "")
