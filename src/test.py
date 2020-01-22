@@ -53,11 +53,11 @@ def test_json_parser():
     o_mdata.write_json_file(os.getcwd(), file_name = "train.json")
     assert os.path.exists(os.path.join(os.getcwd(), "train.json")) == True
 
-    dataset = o_mdata.test()
-    qmodel = QaDataModel(dataset)
+    dataset, qa_pairs = o_mdata.test()
+    qmodel = QaDataModel(dataset, qa_pairs)
 
 def test_QA_dmodel():
-    qmodel = QaDataModel()
+    qmodel, qa_pairs = QaDataModel()
 
 # call test cases
 test_xml_parser()
