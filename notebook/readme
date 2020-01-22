@@ -1,0 +1,5 @@
+
+Tue Jan 21 22:19:11 2020
+$ cd ./../
+$ python3 ./src/EDA.py --eda ./data/dataset/curated_BioASQ_7b/ 
+$ python3 ./src/EDA.py --eda ./data/dataset/curated_BioASQ_6b/
