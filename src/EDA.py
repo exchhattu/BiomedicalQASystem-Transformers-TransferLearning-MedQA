@@ -58,7 +58,7 @@ class EDA:
         """
         fpath_to_file = os.path.join(os.getcwd(), path_to_file)
         with open(fpath_to_file, "w") as of:
-            s_line = "id,question_len,num_word_in_question,answer_len,num_word_in_answer,num_word_in_token"
+            s_line = "id,question_len,num_word_in_question,answer_len,num_word_in_answer,num_word_in_token\n"
             for s_data_name in self._qa_data.keys():
                 t_qa_pair = self._qa_data[s_data_name] 
                 for s_qa_pair in t_qa_pair:
