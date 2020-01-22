@@ -2,27 +2,34 @@
 Author: Rojan Shresthat, Insight Data Science 
 Tue Jan 21 16:18:39 2020
 """
+import os
+import argparse
 
 from pytorch_transformers import XLNetTokenizer
 
-from Data import MedicalData 
+from PyTorch_transform_wrapper import PyTorchTransformWrapper
 
 class EDA:
 
-    def __init__(self, argument_parser):
+    def __init__(self, s_path_to_dir):
+        """
+        Tokenize the datasets and convert into numeric value 
+        for EDA.
+        """
         self._dataset = {}
         self._qa_data = {}
 
         self._tokenizer = XLNetTokenizer.from_pretrained('xlnet-base-cased', do_lower_case=True)
+
+        t_files =  os.listdir(s_path_to_dir)
+        for s_file_name in t_files: 
+            if s_file_name.endswith(".json"): 
+                st_bname = os.path.basename(s_file_name)
+                s_path_to_file = os.path.join(s_path_to_dir, s_file_name) 
+                self._dataset[st_bname] = s_path_to_file 
         
-        t_files = str(argument_parser).split(",")
-        for s_file in t_files:
-            t_parts = s_file.split(":")
-            if len(t_parts) == 2:
-                self._dataset[t_parts[0]] = t_parts[1]
-            else:
-                print("Warn: invalid input format.")
         self._parse_file()
+        self._write_file(path_to_file="bioasq_eda.data")
 
     def _parse_file(self):
         """
@@ -32,23 +39,51 @@ class EDA:
         """
 
         # Collect all data
-        o_mdata     = MedicalData()
+        # o_mdata     = MedicalData()
         t_fnames    = self._dataset.keys()
         for s_data_name in t_fnames:
             s_fpath = self._dataset[s_data_name] 
-            num_qas = o_mdata.parse_json_file(s_fpath, True)
-            self._qa_data[s_data_name] = o_mdata._qa_pair 
+            print("INFO: parsing %s ..." %s_fpath)
+            o_pytorch = PyTorchTransformWrapper()
+            o_pytorch.read_squad_formatted_json_file(s_fpath) 
+            self._qa_data[s_data_name] = o_pytorch._qa_data 
 
-        for s_data_name in self._qa_data.keys():
-            t_qa_pair = self._qa_data[s_data_name] 
-            for s_qa_pair in t_qa_pair:
-                query_tokens = self._tokenizer.tokenize(s_qa_pair._question)
-                s_qa_pair.update_question(len(s_qa_pair._question), len(query_tokens))
+    def _write_file(self, path_to_file="bioasq_eda.data"):
+        """
+        Write a file that contains distribution of question,
+        answer, and context length 
 
-                query_tokens = self._tokenizer.tokenize(s_qa_pair._context)
-                s_qa_pair.update_context(len(s_qa_pair._context), len(query_tokens))
+        params:
+            path_to_file: output file
+        """
+        fpath_to_file = os.path.join(os.getcwd(), path_to_file)
+        with open(fpath_to_file, "w") as of:
+            s_line = "id,question_len,num_word_in_question,answer_len,num_word_in_answer,num_word_in_token"
+            for s_data_name in self._qa_data.keys():
+                t_qa_pair = self._qa_data[s_data_name] 
+                for s_qa_pair in t_qa_pair:
+                    s_line += "%s," %s_qa_pair.qas_id 
 
-                query_tokens = self._tokenizer.tokenize(s_qa_pair._answer)
-                s_qa_pair.update_answer(len(s_qa_pair._answer), len(query_tokens))
+                    # question
+                    query_tokens = self._tokenizer.tokenize(s_qa_pair.question_text)
+                    s_line += "%s,%s," %(len(s_qa_pair.question_text), len(query_tokens))
 
-    # def _compute_sequencec_length(self):
+                    #answer
+                    query_tokens = self._tokenizer.tokenize(s_qa_pair.orig_answer_text)
+                    s_line += "%s,%s," %(len(s_qa_pair.orig_answer_text), len(query_tokens))
+
+                    # context
+                    s_line += "%d" %(len(s_qa_pair.doc_tokens)) 
+                    of.write(s_line)
+                    of.write("\n")
+                    s_line = ""
+
+
+if __name__=="__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--eda", default=None, type=str, required=True,
+            help="analyze a training, validation, and test data, example train:filename, test:filename, validate:filename")
+
+    args = parser.parse_args()
+    if args.eda:
+        eda = EDA(args.eda)
