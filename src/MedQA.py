@@ -30,6 +30,3 @@ if __name__=="__main__":
 
     qa_data_model = QaDataModel()
     qa_data_model.predict_using_predefined_models(data._test_examples)
-
-    
-
