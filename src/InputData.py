@@ -81,5 +81,3 @@ class InputData:
         print("INFO: train data %d (%0.2f)" %(len(self._train_examples), 10.00*float(t_ratio[0])))
         print("INFO: valid data %d (%0.2f)" %(len(self._valid_examples), 10.00*float(t_ratio[1])))
         print("INFO: test data %d (%0.2f)" %(len(self._test_examples), 10.00*float(t_ratio[2])))
-
-
