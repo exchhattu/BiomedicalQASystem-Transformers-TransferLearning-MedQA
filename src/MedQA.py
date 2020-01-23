@@ -28,7 +28,7 @@ if __name__=="__main__":
     data = InputData(args.data)
 
     # this function will generate - data._test_examples, data._train_examples, data._valid_examples
-    data.merge_and_split_data(ratio="0.05:0.01:0.01")
+    data.merge_and_split_data(ratio="0.1:0.01:0.01")
 
     qa_data_model = QaDataModel()
     if args.use_pretrained_model: 
