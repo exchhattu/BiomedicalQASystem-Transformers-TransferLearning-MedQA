@@ -34,7 +34,6 @@ class QaDataModel:
     def __init__(self):
         # self._qa_pairs = qa_pairs # list but not good practice
         self.init_params('xlnet', f_lr=2e-5, f_eps = 1e-8)
-        # self.make_qa_model(train_dataset, valid_dataset, epochs = 4)
 
         self._max_seq_length      = 384
         self._doc_stride          = 128
@@ -70,11 +69,6 @@ class QaDataModel:
             return dataset, examples, features
         return dataset
 
-
-
-
-    # def class 
-
     def init_params(self, model_name, f_lr=2e-5, f_eps = 1e-8):
         self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -96,10 +90,21 @@ class QaDataModel:
         warmup_steps = 0.0
         self._optimizer = AdamW(optimizer_grouped_parameters, lr=f_lr, eps=f_eps)
 
+    def do_end_to_end_tf(self, train_data, valid_data):
+        """
+        train a pretrain model using medical data (domain specific data) end to end.
 
-    def do_train(self, train_example, valid_example, epochs = 4):
-        train_dataset = self._create_dataset(train_examples, evaluate=False)
-        valid_dataset = self._create_dataset(valid_examples, evaluate=False)
+        params:
+            train_example: training set
+            valid_example: validation set
+    
+        """
+        train_dataset = self._create_dataset(train_data, evaluate=False)
+
+        valid_dataset, valid_example, valid_feature = \
+                self._create_dataset(valid_data, evaluate=True, output_examples=True)
+
+        self.write_json_file(valid_data, file_name = "predict.json")
 
         train_batch_size    = 8 # args.per_gpu_train_batch_size * max(1, args.n_gpu) # taken from ...
         train_sampler       = RandomSampler(train_dataset) # if args.local_rank == -1 else DistributedSampler(train_dataset)
@@ -116,16 +121,13 @@ class QaDataModel:
 
         self._model.zero_grad()
         # set random seed.
-
-        
+        epochs = 1 
         for _ in trange(epochs, desc="Iteration"):
             epoch_iterator = tqdm(train_dataloader, desc="Iteration")
             for step, batch in enumerate(epoch_iterator):
                 self._model.train()
-                # what is args.device
                 batch = tuple(t.to(self._device) for t in batch)
 
-                # I should replace it
                 inputs = {'input_ids':       batch[0],
                           'attention_mask':  batch[1], 
                           'token_type_ids':  batch[2],  
@@ -149,128 +151,11 @@ class QaDataModel:
                 global_step += 1
 
                 # validation
-                # get validation data 
-                # 8 * 1
-                eval_batch_size = 8 # default suggested by author  # args.per_gpu_eval_batch_size * max(1, args.n_gpu)
-                # Note that DistributedSampler samples randomly
-                eval_sampler    = SequentialSampler(train_dataset)
-                eval_dataloader = DataLoader(train_dataset, sampler=eval_sampler, batch_size=eval_batch_size)
+                result = self.evaluate(valid_dataset, valid_example, valid_feature, self._model, self._tokenizer, prefix="")
 
-                for batch in tqdm(eval_dataloader, desc="Evaluating"):
-                    self._model.eval()
-                    batch = tuple(t.to(self._device) for t in batch)
-                    print("Coding: length ", len(batch))
+                # write something for checkpoint 
+                # check points
 
-                    with torch.no_grad():
-                        inputs = { "input_ids": batch[0],
-                                   "attention_mask": batch[1],
-                                   "token_type_ids": batch[2],
-                                   "cls_index": batch[3], 
-                                   "p_mask": batch[4]
-                                  }
-                        example_indices = batch[7]
-                        outputs = self._model(**inputs)
-
-                for i, example_index in enumerate(example_indices):
-                    # self._qa_pairs[] # donot confuse, this is member of this class; however I have to make accessible data without reinit.
-                    # eval_feature = features[example_index.item()]
-                    print("Coding: ", eval_feature, outputs)
-                    # unique_id    = int(eval_feature.unique_id)
-
-                #         output = [to_list(output[i]) for output in outputs]
-                #         if len(output) >= 5:
-                #             start_logits = output[0]
-                #             start_top_index = output[1]
-                #             end_logits = output[2]
-                #             end_top_index = output[3]
-                #             cls_logits = output[4]
-                #           
-                #             result = SquadResult(
-                #             unique_id,
-                #             start_logits,
-                #             end_logits,
-                #             start_top_index=start_top_index,
-                #             end_top_index=end_top_index,
-                #             cls_logits=cls_logits,
-                #             )
-
-
-
-
-
-
-
-
-    def prepare_qa_model(self, epochs = 4):
-        # Store our loss and accuracy for plotting
-        self._train_loss_set = []
-        # Number of training epochs (authors recommend between 2 and 4)
-        # epochs = 4
-        # trange is a tqdm wrapper around the normal python range
-        for _ in trange(epochs, desc="Epoch"):
-            # Training
-            # Set our model to training mode (as opposed to evaluation mode)
-            self._model.train()
-
-            # Tracking variables
-            f_train_loss = 0
-            nb_tr_examples, nb_tr_steps = 0, 0
-
-            # Train the data for one epoch
-            for step, batch in enumerate(train_dataloader):
-                self._optimizer.zero_grad() # Clear out the gradients (by default they accumulate)
-
-                # Add batch to GPU
-                # batch = tuple(t.to(device) for t in batch)
-                batch = tuple(t for t in batch)
-                b_input_ids, b_input_mask, b_labels = batch # Unpack the inputs from our dataloader
-                # Forward pass
-                outputs = self._model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask, labels=b_labels)
-                loss = outputs[0]
-                logits = outputs[1]
-                self._train_loss_set.append(loss.item())
-
-                # Backward propagation; Update parameters and take a step using the computed gradient
-                loss.backward()
-                optimizer.step()
-
-                # Update tracking variables
-                self._train_loss += loss.item()
-                nb_tr_examples += b_input_ids.size(0)
-                nb_tr_steps += 1
-
-            print("Train loss: {}".format(f_train_loss/nb_tr_steps))
-
-
-            # Validation
-            # Put model in evaluation mode to evaluate loss on the validation set
-            self._model.eval()
-
-            # Tracking variables
-            eval_loss, eval_accuracy = 0, 0
-            nb_eval_steps, nb_eval_examples = 0, 0
-
-            # Evaluate data for one epoch
-            for batch in validation_dataloader:
-                # Add batch to GPU
-                # batch = tuple(t.to(device) for t in batch)
-                batch = tuple(t for t in batch)
-                # Unpack the inputs from our dataloader
-                b_input_ids, b_input_mask, b_labels = batch
-                # Telling the model not to compute or store gradients, saving memory and speeding up validation
-                with torch.no_grad():
-                    # Forward pass, calculate logit predictions
-                    output = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask)
-                    logits = output[0]
-
-                # Move logits and labels to CPU
-                logits = logits.detach().cpu().numpy()
-                label_ids = b_labels.to('cpu').numpy()
-
-                tmp_eval_accuracy = flat_accuracy(logits, label_ids)
-                eval_accuracy += tmp_eval_accuracy
-                nb_eval_steps += 1
-            print("Validation Accuracy: {}".format(eval_accuracy/nb_eval_steps))
 
     def write_json_file(self, examples, file_name = "predict.json"):
         """
