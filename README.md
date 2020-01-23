@@ -10,8 +10,14 @@ Answer the question related to health
 !pip install pytorch-transformers
 ```
 
-## Data
+## Motivation:
+* Design automated question answering system for health care domain.
+* Implement transfer learning to understand how generic pretrained model can be
+  use in different domain. 
 
+## Goal: 
+
+## Data
 
 XLNet() was used ... Pre-trained model, XLNet() was used
 Following datasets were used.
