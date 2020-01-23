@@ -6,15 +6,17 @@ import os
 import json
 import collections
 
-
 import torch
+from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
+
 from pytorch_transformers import XLNetConfig, XLNetModel, XLNetTokenizer, XLNetForQuestionAnswering
-# from pytorch_transformers import XLNetModel, XLNetTokenizer
 from pytorch_transformers.optimization import WarmupConstantSchedule
 from pytorch_transformers import AdamW
-from utils_squad import convert_examples_to_features
+from utils_squad import (read_squad_examples, convert_examples_to_features,
+                         RawResult, write_predictions,
+                         RawResultExtended, write_predictions_extended)
+from utils_squad_evaluate import EVAL_OPTS, main as evaluate_on_squad
 
-from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler, TensorDataset)
 
 
 from transformers.data.processors.squad import SquadResult
@@ -172,8 +174,6 @@ class QaDataModel:
                 for i, example_index in enumerate(example_indices):
                     # self._qa_pairs[] # donot confuse, this is member of this class; however I have to make accessible data without reinit.
                     # eval_feature = features[example_index.item()]
-                    print("Coding: ", example_index)
-                    eval_feature = self._qa_pairs[example_index]
                     print("Coding: ", eval_feature, outputs)
                     # unique_id    = int(eval_feature.unique_id)
 
@@ -291,7 +291,7 @@ class QaDataModel:
 
             d_answer = {'text': example.orig_answer_text, 
                         'answer_start' : example.start_position }
-
+            # changed qas_id to id since original file format contains id rather than qas_id
             d_sub_data = { "qas_id": example.qas_id,
                            "question": example.question_text,
                            "answers": [d_answer],
@@ -306,17 +306,21 @@ class QaDataModel:
         with open(full_path, 'w') as f:
             json.dump(d_final_data, f)
 
-    def predict_using_predefined_models(self, test_example):
-        test_dataset = self._create_dataset(test_example, evaluate=True)
+    def _to_list(self, tensor):
+        return tensor.detach().cpu().tolist()
 
-        self.write_json_file(test_example, file_name = "predict.json")
+    def predict_using_predefined_models(self, test_data):
+        test_dataset, test_example, test_feature = \
+                self._create_dataset(test_data, evaluate=True, output_examples=True)
+
+        self.write_json_file(test_data, file_name = "predict.json")
 
         # has to dump json file  
         global_step = 1 
-        self.evaluate(test_dataset, self._model, self._tokenizer, prefix=global_step)
+        self.evaluate(test_dataset, test_example, test_feature,
+                        self._model, self._tokenizer, prefix=global_step)
 
-
-    def evaluate(self, dataset, model, tokenizer, prefix=1):
+    def evaluate(self, dataset, examples, features, model, tokenizer, prefix=1):
         # args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
         eval_batch_size = 8 # by default # args.per_gpu_eval_batch_size * max(1, args.n_gpu)
         # Note that DistributedSampler samples randomly
@@ -338,36 +342,37 @@ class QaDataModel:
                 example_indices = batch[3]
                 outputs = model(**inputs)
 
-        for i, example_index in enumerate(example_indices):
-            eval_feature = features[example_index.item()]
-            unique_id = int(eval_feature.unique_id)
-            # XLNet uses a more complex post-processing procedure
-            result = RawResultExtended(unique_id = unique_id,
-                                        start_top_log_probs  = to_list(outputs[0][i]),
-                                        start_top_index      = to_list(outputs[1][i]),
-                                        end_top_log_probs    = to_list(outputs[2][i]),
-                                        end_top_index        = to_list(outputs[3][i]),
-                                        cls_logits           = to_list(outputs[4][i]))
-            all_results.append(result)
+            for i, example_index in enumerate(example_indices):
+                eval_feature = features[example_index.item()]
+                unique_id = int(eval_feature.unique_id)
+                # XLNet uses a more complex post-processing procedure
+                result = RawResultExtended(unique_id = unique_id,
+                                            start_top_log_probs  = self._to_list(outputs[0][i]),
+                                            start_top_index      = self._to_list(outputs[1][i]),
+                                            end_top_log_probs    = self._to_list(outputs[2][i]),
+                                            end_top_index        = self._to_list(outputs[3][i]),
+                                            cls_logits           = self._to_list(outputs[4][i]))
+                all_results.append(result)
 
         # Compute predictions
         output_dir = os.getcwd()
         output_prediction_file = os.path.join(output_dir, "predictions_{}.json".format(prefix))
-        output_nbest_file = os.path.join(args.output_dir, "nbest_predictions_{}.json".format(prefix))
-        # if args.version_2_with_negative:
-        #     output_null_log_odds_file = os.path.join(args.output_dir, "null_odds_{}.json".format(prefix))
-        # else:
-        #     output_null_log_odds_file = None
+        output_nbest_file = os.path.join(output_dir, "nbest_predictions_{}.json".format(prefix))
+        version_2_with_negative = True
+        output_null_log_odds_file = None
+        if version_2_with_negative:
+            output_null_log_odds_file = os.path.join(output_dir, "null_odds_{}.json".format(prefix))
+        else:
+            output_null_log_odds_file = None
 
         # XLNet uses a more complex post-processing procedure
         n_best_size = 20
         max_answer_length = 30
-        output_null_log_odds_file = None
-        version_2_with_negative = True
         verbose_logging = True
+        predict_file = "predict.json"
         write_predictions_extended(examples, features, all_results, n_best_size,
                                     max_answer_length, output_prediction_file,
-                                    output_nbest_file, output_null_log_odds_file, args.predict_file,
+                                    output_nbest_file, output_null_log_odds_file, predict_file,
                                     model.config.start_n_top, model.config.end_n_top,
                                     version_2_with_negative, tokenizer, verbose_logging)
 
@@ -376,4 +381,5 @@ class QaDataModel:
                                     pred_file=output_prediction_file,
                                     na_prob_file=output_null_log_odds_file)
         results = evaluate_on_squad(evaluate_options)
+        # print("Coding: final result ", results)
         return results
