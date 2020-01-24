@@ -155,6 +155,7 @@ class QaDataModel:
 
                 # write something for checkpoint 
                 # check points
+                self._write_check_points(self._model, global_step)
 
 
     def write_json_file(self, examples, file_name = "predict.json"):
@@ -268,3 +269,14 @@ class QaDataModel:
         results = evaluate_on_squad(evaluate_options)
         # print("Coding: final result ", results)
         return results
+
+    def _write_check_points(self, model, step_num):
+        path_to_output_dir = os.path.join(os.getcwd(), "checkpts")
+        output_dir = os.path.join(path_to_output_dir, 'checkpoint-{}'.format(step_num))
+        if not os.path.exists(output_dir): os.makedirs(output_dir)
+        # model_to_save = model.module if hasattr(model, 'module') else model  # Take care of distributed/parallel training
+        model.save_pretrained(output_dir)
+        torch.save(output_dir, os.path.join(output_dir, 'training_args.bin'))
+        print("Saving model checkpoint to %s", output_dir)
+
+    # def do_evaluate_using_check_points(self):
