@@ -27,7 +27,8 @@ if __name__=="__main__":
     args = parser.parse_args()
     data = InputData(args.data)
     # this function will generate - data._test_examples, data._train_examples, data._valid_examples
-    data.merge_and_split_data(ratio="0.2:0.05:9.75", write_file=True)
+    data.merge_and_split_data(ratio="9.0:0.5:0.5", write_file=True)
+    sys.exit()
 
     qa_data_model = QaDataModel()
     if args.use_pretrained_model: 
