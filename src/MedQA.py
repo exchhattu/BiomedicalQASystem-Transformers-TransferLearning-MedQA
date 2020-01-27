@@ -5,7 +5,7 @@ Tue Jan 21 16:04:06 2020
 
 import argparse
 import logging
-import os
+import sys, os
 
 from InputData import InputData 
 from QADataModel import QaDataModel
@@ -26,14 +26,14 @@ if __name__=="__main__":
 
     args = parser.parse_args()
     data = InputData(args.data)
-
     # this function will generate - data._test_examples, data._train_examples, data._valid_examples
-    data.merge_and_split_data(ratio="0.1:0.01:0.01")
+    data.merge_and_split_data(ratio="0.2:0.05:9.75", write_file=True)
 
     qa_data_model = QaDataModel()
     if args.use_pretrained_model: 
         qa_data_model.predict_using_predefined_models(data._test_examples)
     elif args.end_to_end:
-        qa_data_model.do_end_to_end_tf(data._train_examples, data._valid_examples)
+        print("Coding: I entered ")
+        qa_data_model.do_end_to_end(data._train_examples, data._valid_examples)
 
 
