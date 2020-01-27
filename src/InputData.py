@@ -7,11 +7,32 @@ import os
 import json
 import numpy as np
 
-from pytorch_transformers import XLNetModel, XLNetTokenizer
-from pytorch_transformers import AdamW
+from squad_update import SquadResult, SquadV1Processor, SquadV2Processor
 
-
-from PyTorch_transform_wrapper import PyTorchTransformWrapper
+# from transformers.data.processors.squad import SquadResult, SquadV1Processor, SquadV2Processor
+from transformers import (WEIGHTS_NAME,
+    AdamW,
+    AlbertConfig,
+    AlbertForQuestionAnswering,
+    AlbertTokenizer,
+    BertConfig,
+    BertForQuestionAnswering,
+    BertTokenizer,
+    DistilBertConfig,
+    DistilBertForQuestionAnswering,
+    DistilBertTokenizer,
+    # RobertaConfig,
+    # RobertaForQuestionAnswering,
+    # RobertaTokenizer,
+    XLMConfig,
+    XLMForQuestionAnswering,
+    XLMTokenizer,
+    XLNetConfig,
+    XLNetForQuestionAnswering,
+    XLNetTokenizer,
+    get_linear_schedule_with_warmup,
+    squad_convert_examples_to_features,
+    )
 
 import collections
 
@@ -26,12 +47,15 @@ class InputData:
         self._dataset = {}
         self._qa_data = {}
 
+        # SquadV1Processor does not hold start_pos in object
+        # self._d_start_pos = collections.OrderedDict()
+
         t_files =  os.listdir(s_path_to_dir)
         for s_file_name in t_files: 
             if s_file_name.endswith(".json"): 
                 st_bname = os.path.basename(s_file_name)
-                s_path_to_file = os.path.join(s_path_to_dir, s_file_name) 
-                self._dataset[st_bname] = s_path_to_file 
+                # s_path_to_file = os.path.join(s_path_to_dir, s_file_name) 
+                self._dataset[st_bname] = s_path_to_dir 
         self._parse_file()
 
         
@@ -41,20 +65,26 @@ class InputData:
         multiple file can be inputted. However, each file should be 
         differntiated by their unique name.
         """
+        # Squaad V1 format - no control over separating for training 
+        # testing ....
+        processor = SquadV1Processor()
 
         # Collect all data
         t_fnames    = self._dataset.keys()
         for s_data_name in t_fnames:
             s_fpath = self._dataset[s_data_name] 
             print("INFO: parsing %s ..." %s_fpath)
-            o_pytorch = PyTorchTransformWrapper()
-            o_pytorch.read_squad_formatted_json_file(s_fpath) 
-            self._qa_data[s_data_name] = o_pytorch._qa_data 
+
+            examples = processor.get_train_examples(s_fpath, filename=s_data_name)
+            print("Coding: ", len(examples))
+            self._qa_data[s_data_name] = examples 
 
     def merge_and_split_data(self, ratio="8:1:1", write_file=False):
         """
-        merge a data collected from multiple files and divide
+        Merge a data collected from multiple files and divide
         subsequently into train, test, and validation randomly
+
+
         """
         self._train_examples = []
         self._test_examples = []
@@ -105,14 +135,14 @@ class InputData:
             d_answer = collections.OrderedDict() 
             # print(example.doc_tokens)
 
-            d_answer = {'text': example.orig_answer_text, 
-                        'answer_start' : example.start_position }
+            d_answer = {'text': example.answer_text, 
+                        'answer_start' : example.start_position_character }
             # changed qas_id to id since original file format contains id rather than qas_id
             d_sub_data = { "id": example.qas_id,
                            "question": example.question_text,
                            "answers": [d_answer],
                             }
-            d_data = {"qas": [d_sub_data], "context": " ".join(example.doc_tokens)}
+            d_data = {"qas": [d_sub_data], "context": example.context_text}
             t_data.append(d_data)
         d_paragraph = {"paragraphs": t_data} 
         d_final_data = {"data": [d_paragraph]}
