@@ -117,7 +117,9 @@ def read_squad_examples(input_file, is_training, version_2_with_negative):
         if c == " " or c == "\t" or c == "\r" or c == "\n" or ord(c) == 0x202F:
             return True
         return False
-
+    
+    invalid_count = 0
+    recover_count = 0
     examples = []
     for entry in input_data:
         for paragraph in entry["paragraphs"]:
@@ -166,14 +168,26 @@ def read_squad_examples(input_file, is_training, version_2_with_negative):
                         cleaned_answer_text = " ".join(
                             whitespace_tokenize(orig_answer_text))
                         if actual_text.find(cleaned_answer_text) == -1:
-                            logger.warning("Could not find answer: '%s' vs. '%s'",
-                                           actual_text, cleaned_answer_text)
-                            continue
+                            logger.warning("Could not find answer: '%s' '%s' vs. '%s'",
+                                           qas_id, actual_text, cleaned_answer_text)
+
+                            # majority of data is kick out by this constraints
+                            s_idx, e_idx = parse_further(cleaned_answer_text, doc_tokens)
+                            if s_idx == -1 and e_idx == -1: 
+                                invalid_count += 1
+                                print("Coding: still invalid ", qas_id, actual_text, cleaned_answer_text, orig_answer_text, s_idx, e_idx )
+                                continue
+                            print("Coding: reovered ", qas_id, actual_text, cleaned_answer_text, orig_answer_text, s_idx, e_idx, start_position, end_position, doc_tokens)
+                            start_position = s_idx
+                            end_position = e_idx
+                            recover_count += 1
+                            # continue
                     else:
                         start_position = -1
                         end_position = -1
                         orig_answer_text = ""
 
+                print("Coding: exmaple work ", qas_id, orig_answer_text, start_position, end_position, doc_tokens)
                 example = SquadExample(
                     qas_id=qas_id,
                     question_text=question_text,
@@ -183,7 +197,26 @@ def read_squad_examples(input_file, is_training, version_2_with_negative):
                     end_position=end_position,
                     is_impossible=is_impossible)
                 examples.append(example)
+    print("Coding: invalid count ", invalid_count)
+    print("Coding: recovered ", recover_count) 
     return examples
+
+def parse_further(cleaned_answer_text, doc_tokens):
+    t_parts = cleaned_answer_text.split()
+    s_idx = []
+    e_idx = []
+    length = len(t_parts)
+    for i, x in enumerate(doc_tokens):
+        if x == t_parts[0] or t_parts[0] in x: s_idx.append(i)
+        if x == t_parts[-1] or t_parts[0] in x: e_idx.append(i)
+      
+    for is_idx in s_idx:
+        ie_idx = is_idx + length -1 
+        if ie_idx in e_idx:
+            return is_idx, ie_idx
+    return -1, -1 
+        
+
 
 
 def convert_examples_to_features(examples, tokenizer, max_seq_length,
