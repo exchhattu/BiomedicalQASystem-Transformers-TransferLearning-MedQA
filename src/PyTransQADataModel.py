@@ -34,6 +34,8 @@ class QaDataModel:
     """
 
     def __init__(self):
+        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print("Coding: device name ", self._device)
         self.init_params('xlnet', 'xlnet-base-cased', f_lr=5e-5, f_eps = 1e-8)
 
         self._max_seq_length      = 384
@@ -71,12 +73,12 @@ class QaDataModel:
         return dataset
 
     def init_params(self, model_name, pre_trained_model, f_lr=5e-5, f_eps = 1e-8):
-        self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         MODEL_CLASSES   = { "xlnet": (XLNetConfig, XLNetForQuestionAnswering, XLNetTokenizer) }
         # self._config, self._model_class, self._tokenizer = MODEL_CLASSES[model_name]
         self._tokenizer = XLNetTokenizer.from_pretrained(pre_trained_model, do_lower_case=True)
         self._config    = XLNetConfig.from_pretrained(pre_trained_model, do_lower_case=True)
         self._model     = XLNetForQuestionAnswering.from_pretrained(pre_trained_model, config=self._config)
+        self._model.to(self._device)
 
         no_decay = ['bias', 'LayerNorm.weight']
         weight_decay = 0.0 # Author's default parameter
@@ -98,7 +100,6 @@ class QaDataModel:
             valid_example: validation set
     
         """
-        self.set_seed()
         train_dataset = self._create_dataset(train_data, evaluate=False)
 
         valid_dataset, valid_example, valid_feature = \
@@ -116,16 +117,19 @@ class QaDataModel:
                                                           num_warmup_steps=0 , # default value in run_squad.py 
                                                           num_training_steps=t_total) 
 
+        self.set_seed()
         global_step = 0
         tr_loss, logging_loss = 0.0, 0.0
 
         self._model.zero_grad()
         # set random seed.
         epochs = 2 
-        epoch = 0
-        for _ in trange(epochs, desc="Iteration"):
-            epoch += 1
+        epoch_count = 0
+        for _ in trange(epochs, desc="Epoch"):
+            epoch_count += 1
             epoch_iterator = tqdm(train_dataloader, desc="Iteration")
+            print("Coding: train_dataloader ", len(train_dataloader), len(train_dataset))
+            l_loss_sum = 0
             for step, batch in enumerate(epoch_iterator):
                 self._model.train()
                 batch = tuple(t.to(self._device) for t in batch)
@@ -142,7 +146,8 @@ class QaDataModel:
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self._model.parameters(), 1.0) # max_grad_norm = 1.0 by default
                 tr_loss += loss.item()
-                print("Coding: loss ", epoch , step, tr_loss, loss.item(), loss.mean(), len(batch))
+                l_loss_sum += loss.item()
+                print("Coding: loss ", epoch_count, step, tr_loss, l_loss_sum/train_batch_size)
                 
                 # this function does not have effect unless gradient_accumulation_steps > 1
                 # however, it was set to 1 in original code.
@@ -157,13 +162,12 @@ class QaDataModel:
                 result = self.evaluate(valid_dataset, valid_example, 
                                        valid_feature, self._model, 
                                        self._tokenizer, prefix="")
-                print("Coding: result ", epoch, result)
+                print("Coding: result ", epoch_count, step, result["f1"])
 
         # write something for checkpoint 
         # check points
         self._write_check_points(self._model, global_step)
 
-        # 
 
     def write_json_file(self, examples, file_name = "predict.json"):
         """
@@ -199,7 +203,7 @@ class QaDataModel:
         with open(full_path, 'w') as f:
             json.dump(d_final_data, f)
 
-    def set_seed():
+    def set_seed(self):
         """ to reproduce the result  """
 
         seed = 42
@@ -210,7 +214,11 @@ class QaDataModel:
 
     def _to_list(self, tensor):
         """ helper function """
-        return tensor.detach().cpu().tolist()
+        # return tensor.detach().cpu().tolist()
+        return tensor.detach().tolist()
+        # input_ids_tensor = input_ids_tensor.to(self.device)
+        # segment_ids_tensor = segment_ids_tensor.to(self.device)
+        # input_mask_tensor = input_mask_tensor.to(self.device)
 
     def predict_using_predefined_models(self, test_data):
         """
@@ -256,11 +264,11 @@ class QaDataModel:
                 unique_id = int(eval_feature.unique_id)
                 # XLNet uses a more complex post-processing procedure
                 result = RawResultExtended(unique_id = unique_id,
-                                            start_top_log_probs  = self._to_list(outputs[0][i]),
-                                            start_top_index      = self._to_list(outputs[1][i]),
-                                            end_top_log_probs    = self._to_list(outputs[2][i]),
-                                            end_top_index        = self._to_list(outputs[3][i]),
-                                            cls_logits           = self._to_list(outputs[4][i]))
+                                            start_top_log_probs  =  self._to_list(outputs[0][i]),
+                                            start_top_index      =  self._to_list(outputs[1][i]),
+                                            end_top_log_probs    =  self._to_list(outputs[2][i]),
+                                            end_top_index        =  self._to_list(outputs[3][i]),
+                                            cls_logits           =  self._to_list(outputs[4][i]))
                 all_results.append(result)
 
         # Compute predictions
