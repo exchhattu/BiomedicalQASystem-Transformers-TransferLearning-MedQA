@@ -168,6 +168,7 @@ class QaDataModel:
         # setup 
         train_batch_size    = 8 
         train_dataset       = self._create_dataset(train_data, evaluate=False)
+        print("Coding: train dataset ", train_dataset)
         train_sampler       = RandomSampler(train_dataset) 
         train_dataloader    = DataLoader(train_dataset, sampler=train_sampler, batch_size=train_batch_size)
 
@@ -206,11 +207,11 @@ class QaDataModel:
                 outputs = self._model(**inputs)
                 loss = outputs[0]  # model outputs are always tuple in pytorch-transformers (see doc)
                 loss.backward()
-                print("Coding: ", self._model.parameters())
+                print("Coding: parameter ", self._model.parameters())
                 # torch.nn.utils.clip_grad_norm_(self._model.parameters(), 1.0) # max_grad_norm = 1.0 by default
                 f_local_loss = loss.item()
                 tr_loss += f_local_loss 
-                print("INFO: %s epoch % loss: %0.2f" %(global_step, step, f_local_loss))
+                print("INFO: %s epoch % loss: %0.2f %f" %(global_step, step, tr_loss, f_local_loss))
                 # torch.nn.utils.clip_grad_norm_(self._model, 1.0) # 1.0 is default by author's
                 
                 # this function does not have effect unless gradient_accumulation_steps > 1
@@ -224,11 +225,11 @@ class QaDataModel:
 
                 # validation
                 result = self.evaluate(valid_dataset, valid_example, valid_feature)
-                print(result)
+                print("Coding: result ", result)
 
                 # write something for checkpoint 
                 # check points
-                self._write_check_points(self._model, global_step)
+                # self._write_check_points(self._model, global_step)
 
 
     def write_json_file(self, examples, file_name = "predict.json"):
