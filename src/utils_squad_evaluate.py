@@ -53,7 +53,10 @@ def make_qid_to_has_ans(dataset):
     for p in article['paragraphs']:
       for qa in p['qas']:
         # modified id to qas_id
-        qid_to_has_ans[qa['qas_id']] = bool(qa['answers'])
+        if 'id' in qa.keys(): 
+            qid_to_has_ans[qa['id']] = bool(qa['answers'])
+        else:
+            qid_to_has_ans[qa['qas_id']] = bool(qa['answers'])
   return qid_to_has_ans
 
 def normalize_answer(s):
@@ -99,7 +102,11 @@ def get_raw_scores(dataset, preds):
     for p in article['paragraphs']:
       for qa in p['qas']:
         # Also changed for id to qas_id
-        qid = qa['qas_id']
+        qid = ""
+        if 'id' in qa.keys():
+            qid = qa['id']
+        else:
+            qid = qa['qas_id']
         gold_answers = [a['text'] for a in qa['answers']
                         if normalize_answer(a['text'])]
         if not gold_answers:
