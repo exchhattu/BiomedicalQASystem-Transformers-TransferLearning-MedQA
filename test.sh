@@ -11,4 +11,6 @@ python3 ./src/MedQA.py --data ./unittest/test4_json/
 python3 ./src/MedQA.py --use_pretrained_model --data ./data/dataset/curated_BioASQ_7b/
 
 python3 ./src/MedQA.py --end_to_end --data ./unittest/test4_json/
+
+python3 ./src/MedQA.py --end_to_end --data ./unittest/test_squad/
     
