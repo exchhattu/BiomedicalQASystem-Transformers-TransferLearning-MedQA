@@ -310,6 +310,7 @@ class QaDataModel:
         model_class = XLNetForQuestionAnswering
         self._model = model_class.from_pretrained(path_to_model)
         self._model.to(self._device)
-        self.evaluate(test_dataset, test_example, test_feature, 
+        result = self.evaluate(test_dataset, test_example, test_feature, 
                         self._model, self._tokenizer, prefix="")
+        print("INFO: result ", result)
 
