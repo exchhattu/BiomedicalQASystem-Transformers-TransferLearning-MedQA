@@ -8,27 +8,23 @@ import logging
 import sys, os
 import subprocess
 
-from InputData import InputData 
+from PyTransInputData import InputData 
 from QADataModel import QaDataModel
 
-#                                       --train_file $SQUAD_DIR/003/train.json \
-#                                             --predict_file $SQUAD_DIR/003/valid.json \
-#                                                   --do_train \
-#                                                         --do_eval \
-
 def train_valid_cmd(path_to_train, path_to_test):
-    program_path = os.path.join(os.getcwd(), "/src/run_squad.py") 
+    program_path = os.path.join(os.getcwd(), "src/run_squad_update.py") 
     if not os.path.exists(program_path):
-        print("FATAL: program %s not found" %program_path)
+        print("FATAL: %s not found" %program_path)
         sys.exit()
 
     default_args = ( "python3",  program_path, \
               "--overwrite_cache",  "--overwrite_output_dir", "--model_type", "xlnet", 
-              "--model_name_or_path", "xlnet-base-cased",  
+              "--model_name_or_path", "xlnet-base-cased", "--output_dir", "output_logs" 
               "--do_lower_case",  "--learning_rate", "3e-5",  
               "--num_train_epochs", "5", "--max_seq_length", "192", 
               "--doc_stride", "128", "--train_file", path_to_train,
-              "--predict_file", path_to_test, "--do_train", "--do_eval")
+              "--predict_file", path_to_test, "--do_train", "--do_eval",
+              "--num_sample", "10")
     return default_args
 
 
@@ -46,26 +42,24 @@ if __name__=="__main__":
                         help='Modify the hyperparameter and parameters')
 
     args = parser.parse_args()
-    print(os.getcwd())
-    
 
 
     data = InputData(args.data)
     # this function will generate - data._test_examples, data._train_examples, data._valid_examples
     data.merge_and_split_data(ratio="9.00:1.00:0.00", write_file=True)
-    # sys.exit()
-    path_to_train = ""
-    path_to_valid = ""
-    st_cmd = train_valid_cmd(path_to_train, path_to_test):
+    path_to_train = os.path.join(data._path_to_dir, "train.json") 
+    path_to_valid = os.path.join(data._path_to_dir, "valid.json") 
+    path_to_test = os.path.join(data._path_to_dir, "test.json") 
+
+    st_cmd = train_valid_cmd(path_to_train, path_to_valid)
 
     qa_data_model = QaDataModel()
     if args.use_pretrained_model: 
         qa_data_model.predict_using_predefined_models(data._test_examples)
     elif args.end_to_end:
         popen = subprocess.Popen(st_cmd, stdout=subprocess.PIPE)
-        popen.wait()
+        # popen.wait()
         # output = popen.stdout.read()
-        # print("Coding: I entered ")
         # qa_data_model.do_end_to_end(data._train_examples, data._valid_examples)
 
 
