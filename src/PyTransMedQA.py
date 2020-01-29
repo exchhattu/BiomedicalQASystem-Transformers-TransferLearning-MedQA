@@ -30,14 +30,13 @@ if __name__=="__main__":
     data = InputData(args.data)
     # this function will generate - data._test_examples, data._train_examples, data._valid_examples
    #  data.merge_and_split_data(ratio="9.00:1.00:0.00", write_file=True)
-    data.merge_and_split_data(ratio="0.10:0.01:8.50")
-    # sys.exit()
+    data.merge_and_split_data(ratio="9.00:0.05:0.05")
 
     qa_data_model = QaDataModel()
     if args.serve_model: 
         qa_data_model.serve_models(data._test_examples, "")
     elif args.end_to_end:
         qa_data_model.do_end_to_end(data._train_examples, data._valid_examples)
-        qa_data_model.serve_models(data._test_examples, "")
+        # qa_data_model.serve_models(data._test_examples, "")
 
 
