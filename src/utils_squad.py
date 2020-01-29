@@ -175,9 +175,9 @@ def read_squad_examples(input_file, is_training, version_2_with_negative):
                             s_idx, e_idx = parse_further(cleaned_answer_text, doc_tokens)
                             if s_idx == -1 and e_idx == -1: 
                                 invalid_count += 1
-                                print("Coding: still invalid ", qas_id, actual_text, cleaned_answer_text, orig_answer_text, s_idx, e_idx )
+                                # print("Coding: still invalid ", qas_id, actual_text, cleaned_answer_text, orig_answer_text, s_idx, e_idx )
                                 continue
-                            print("Coding: reovered ", qas_id, actual_text, cleaned_answer_text, orig_answer_text, s_idx, e_idx, start_position, end_position, doc_tokens)
+                            # print("Coding: reovered ", qas_id, actual_text, cleaned_answer_text, orig_answer_text, s_idx, e_idx, start_position, end_position, doc_tokens)
                             start_position = s_idx
                             end_position = e_idx
                             recover_count += 1
@@ -187,7 +187,7 @@ def read_squad_examples(input_file, is_training, version_2_with_negative):
                         end_position = -1
                         orig_answer_text = ""
 
-                print("Coding: exmaple work ", qas_id, orig_answer_text, start_position, end_position, doc_tokens)
+                # print("Coding: exmaple work ", qas_id, orig_answer_text, start_position, end_position, doc_tokens)
                 example = SquadExample(
                     qas_id=qas_id,
                     question_text=question_text,
@@ -197,8 +197,8 @@ def read_squad_examples(input_file, is_training, version_2_with_negative):
                     end_position=end_position,
                     is_impossible=is_impossible)
                 examples.append(example)
-    print("Coding: invalid count ", invalid_count)
-    print("Coding: recovered ", recover_count) 
+    print("INFO: invalid count ", invalid_count)
+    print("INFO: recovered ", recover_count) 
     return examples
 
 def parse_further(cleaned_answer_text, doc_tokens):
