@@ -17,24 +17,50 @@ an answer quickly.
 
 
 ## Motivation:
-* Design automated question answering system for health care domain.
+* Design a platfrom, automated question answering system for health care domain.
 * Implement transfer learning to understand how generic pretrained model can be
   use in different domain. 
 * Fine-tune generic models trained on large corpus for specific downstream
   goal. 
 
-## Goal: 
-* Design a platform for the medical professionals, where they can find the answer question 
-  from relevant documents, to ease their task.  
-
 ## Data and pre-trained model
-* [BioASQ Data](https://github.com/dmis-lab/bioasq-biobert)
+* [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
 * [XLnet](https://github.com/zihangdai/xlnet) permutation language model
+* Explotratory Data Analysis
+Run follow command to get token level counts
+```
+$ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
+```
+mean  61.570101  15.880612  11.861345  4.574230  31.958541
+std  22.813159  6.274397  13.352894  3.620486  28.110541
 
-## EDA
+ 
 
 
 ## Model
+
+### Unit test
+Unit test for basic functionality 
+```
+$ python3 ./src/test.py
+```
+
+### Steps 
+* To build a model, run following command that performs following tasks:
+1. Split the given data into train, valid and test in the ratio of 90%, 5%, and 5% 
+2. Introduce montecarlo sampling to train the models with different epochs and
+   learning rate. Select the best model for downstream task.
+
+Help, 
+```
+$ python3 ./src/build_model_MedQA.py or ./src/build_model_MedQA.py -h
+```
+
+### Usage 
+```
+$ python3 ./src/build_model_MedQA.py --end_to_end --data path_to_dir 
+```
+
 
 ## Result
 
