@@ -34,19 +34,19 @@ if __name__=="__main__":
     parser.add_argument('--data', default='None', type=str, 
                             required=True,
                             help='path to data directory')
-    # parser.add_argument("--mode", default="transfer_model", type=str, required=True,
-    #                     help="select one from (transfer_model, pretrained, fronzen)")
-    parser.add_argument('--use_pretrained_model', action='store_true', 
-                        help='XLNet models or others')
+    ## optional parameters
+    parser.add_argument('--inference', action='store_true', 
+                        help='Modify the hyperparameter and parameters')
+    parser.add_argument("--model_path", default=None, type=str, required=False,
+                        help="path to a model")
     parser.add_argument('--end_to_end', action='store_true', 
                         help='Modify the hyperparameter and parameters')
 
     args = parser.parse_args()
-
-
     data = InputData(args.data)
     # this function will generate - data._test_examples, data._train_examples, data._valid_examples
-    data.merge_and_split_data(ratio="9.00:1.00:0.00", write_file=True)
+    data.merge_and_split_data(ratio="9.00:0.50:0.50", write_file=True)
+    # sys.exit()
     path_to_train = os.path.join(data._path_to_dir, "train.json") 
     path_to_valid = os.path.join(data._path_to_dir, "valid.json") 
     path_to_test = os.path.join(data._path_to_dir, "test.json") 
@@ -54,12 +54,7 @@ if __name__=="__main__":
     st_cmd = train_valid_cmd(path_to_train, path_to_valid)
 
     qa_data_model = QaDataModel()
-    if args.use_pretrained_model: 
+    if args.inference: 
         qa_data_model.predict_using_predefined_models(data._test_examples)
     elif args.end_to_end:
         popen = subprocess.Popen(st_cmd, stdout=subprocess.PIPE)
-        # popen.wait()
-        # output = popen.stdout.read()
-        # qa_data_model.do_end_to_end(data._train_examples, data._valid_examples)
-
-
