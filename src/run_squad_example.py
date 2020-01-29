@@ -71,7 +71,7 @@ def set_seed(args):
 def to_list(tensor):
     return tensor.detach().cpu().tolist()
 
-def train(args, train_dataset, model, tokenizer):
+def train(args, train_dataset, model, tokenizer, sample_id=0):
     """ Train the model """
     if args.local_rank in [-1, 0]:
         tb_writer = SummaryWriter()
@@ -120,7 +120,7 @@ def train(args, train_dataset, model, tokenizer):
                    args.train_batch_size * args.gradient_accumulation_steps * (torch.distributed.get_world_size() if args.local_rank != -1 else 1))
     logger.info("  Gradient Accumulation steps = %d", args.gradient_accumulation_steps)
     logger.info("  Total optimization steps = %d", t_total)
-
+    
     global_step = 0
     tr_loss, logging_loss = 0.0, 0.0
     model.zero_grad()
@@ -171,14 +171,14 @@ def train(args, train_dataset, model, tokenizer):
                         results = evaluate(args, model, tokenizer)
                         print("INFO: epoch epoch: ", epoch_c, "batch: ", step, "result: ", results)
                         for key, value in results.items():
-                            tb_writer.add_scalar('eval_{}'.format(key), value, global_step)
-                    tb_writer.add_scalar('lr', scheduler.get_lr()[0], global_step)
-                    tb_writer.add_scalar('loss', (tr_loss - logging_loss)/args.logging_steps, global_step)
+                            tb_writer.add_scalar('eval_{}'.format(key), value, global_step, sample_id)
+                    tb_writer.add_scalar('lr', scheduler.get_lr()[0], global_step, sample_id)
+                    tb_writer.add_scalar('loss', (tr_loss - logging_loss)/args.logging_steps, global_step, sample_id)
                     logging_loss = tr_loss
 
                 if args.local_rank in [-1, 0] and args.save_steps > 0 and global_step % args.save_steps == 0:
                     # Save model checkpoint
-                    output_dir = os.path.join(args.output_dir, 'checkpoint-{}'.format(global_step))
+                    output_dir = os.path.join(args.output_dir, 'checkpoint-{}-{}'.format(global_step, sample_id))
                     if not os.path.exists(output_dir):
                         os.makedirs(output_dir)
                     model_to_save = model.module if hasattr(model, 'module') else model  # Take care of distributed/parallel training
@@ -340,7 +340,7 @@ def main():
                         help="Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys()))
     parser.add_argument("--model_name_or_path", default=None, type=str, required=True,
                         help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(ALL_MODELS))
-    parser.add_argument("--output_dir", default=None, type=str, required=True,
+    parser.add_argument("--output_dir", default="outdir", type=str, required=True,
                         help="The output directory where the model checkpoints and predictions will be written.")
 
     ## Other parameters
@@ -402,9 +402,9 @@ def main():
                         help="If true, all of the warnings related to data processing will be printed. "
                              "A number of warnings are expected for a normal SQuAD evaluation.")
 
-    parser.add_argument('--logging_steps', type=int, default=50,
+    parser.add_argument('--logging_steps', type=int, default=500,
                         help="Log every X updates steps.")
-    parser.add_argument('--save_steps', type=int, default=50,
+    parser.add_argument('--save_steps', type=int, default=100000,
                         help="Save checkpoint every X updates steps.")
     parser.add_argument("--eval_all_checkpoints", action='store_true',
                         help="Evaluate all checkpoints starting with the same prefix as model_name ending and ending with step number")
@@ -416,6 +416,8 @@ def main():
                         help="Overwrite the cached training and evaluation sets")
     parser.add_argument('--seed', type=int, default=42,
                         help="random seed for initialization")
+    parser.add_argument("--num_sample", default=1, type=int,
+                        help="number of random trial for training.")
 
     parser.add_argument("--local_rank", type=int, default=-1,
                         help="local_rank for distributed training on gpus")
@@ -480,9 +482,15 @@ def main():
     # Training
     if args.do_train:
         train_dataset = load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=False)
-        global_step, tr_loss = train(args, train_dataset, model, tokenizer)
-        logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
-
+        models = {} 
+        for i in range(0, args.num_sample):
+            args.num_train_epochs = random.randint(3, 12)
+            args.learning_rate = random.uniform(5e-4, 3e-7) 
+            global_step, tr_loss = train(args, train_dataset, model, tokenizer, i+1)
+            logger.info("sample_id = %s, global_step = %s, average loss = %s", i+1, global_step, tr_loss)
+            models["%.2f" %tr_loss] = model
+    # select the best model based on average loss
+    model = sorted(models.keys())[0]
 
     # Save the trained model and the tokenizer
     if args.local_rank == -1 or torch.distributed.get_rank() == 0:
