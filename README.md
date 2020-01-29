@@ -51,12 +51,15 @@ $ python3 ./src/test.py
 2. Introduce montecarlo sampling to train the models with different epochs and
    learning rate. Select the best model for downstream task.
 
-Help, 
+### Usage 
+* Help 
 ```
-$ python3 ./src/build_model_MedQA.py or ./src/build_model_MedQA.py -h
+$ python3 ./src/build_model_MedQA.py 
+or 
+$ python3 ./src/build_model_MedQA.py -h
 ```
 
-### Usage 
+* How to run
 ```
 $ python3 ./src/build_model_MedQA.py --end_to_end --data path_to_dir 
 ```
