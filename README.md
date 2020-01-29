@@ -46,7 +46,7 @@ $ python3 ./src/test.py
 ```
 
 ### Steps 
-* To build a model, run following command that performs following tasks:
+To build a model, run following command that performs following tasks:
 1. Split the given data into train, valid and test in the ratio of 90%, 5%, and 5% 
 2. Introduce montecarlo sampling to train the models with different epochs and
    learning rate. Select the best model for downstream task.
