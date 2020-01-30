@@ -27,7 +27,7 @@ an answer quickly.
 ![alt text](https://github.com/exchhattu/MedQA/blob/master/images/pipeline.png)
 
 ### Data and pre-trained model
-1. [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
+* [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
 
 There are 40K examples for factoid question answer from BioASQ7B. However, unique examples are selected. This resulted 
 6K examples. Examples such as yes/no and list questions were also excluded.  Explotratory data analysis is carried out to 
@@ -39,28 +39,28 @@ For detail, see a [juypter notebook](https://github.com/exchhattu/MedQA/blob/mas
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
 
-2 [XLnet](https://github.com/zihangdai/xlnet) permutation language model
-... Pretrained XLnet model and pytorch_transformer were used for downstream task. 
+* [XLnet](https://github.com/zihangdai/xlnet) permutation language model
+Pretrained [XLnet model](https://arxiv.org/abs/1906.08237) and pytorch_transformer were used for downstream task. 
 
-### Model
-#### Unit test
+### Model management
+* Unit test
 For unit test
 ```
 $ python3 ./src/test.py
 ```
 
-#### Steps 
+* Overview 
 To build a model, run following command that performs following tasks:
 1. Split the given data into train (90%), valid (5%) and test(5%). 
 2. Two parameters - # of epoch and learing rate are optimized using montecarlo sampling 
    and selected the best model. 
 
-#### Usage 
+* Usage 
 How to run
 ```
 $ python3 ./src/build_model_MedQA.py --end_to_end --data path_to_dir 
 ```
-### Serving 
+### Model management and Serving 
 Best model is used for serving. MXnet is used to top on the pytorch built
 model. Model is uploaded in [S3 bucket](https://aws.amazon.com/blogs/machine-learning/deploying-pytorch-inference-with-mxnet-model-server/)
 The script used for model serving is at ./serving. To serve model:
