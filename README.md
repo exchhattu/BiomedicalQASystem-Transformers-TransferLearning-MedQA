@@ -23,63 +23,54 @@ an answer quickly.
 * Fine-tune generic models trained on large corpus for specific downstream
   goal. 
 
-## Pipeline
+## Pipeline:
 ![alt text](https://github.com/exchhattu/MedQA/blob/master/images/pipeline.png)
 
 ### Data and pre-trained model
-* [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
-* [XLnet](https://github.com/zihangdai/xlnet) permutation language model
-* Explotratory Data Analysis
-Run follow command to get token level counts
+1. [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
+... There are 40K examples for factoid question answer from BioASQ7B. However, unique examples are selected. This resulted 
+... 6K examples. Examples such as yes/no and list questions were also excluded.  Explotratory data analysis is carried out to 
+... understand the distribution. Interesting, same answer appeared in mutliple contexts. Therefore, answer and its appearance 
+... in context is also evaluated. For detail, see a [juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
 ```
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
-mean  61.570101  15.880612  11.861345  4.574230  31.958541
-std  22.813159  6.274397  13.352894  3.620486  28.110541
+
+2 [XLnet](https://github.com/zihangdai/xlnet) permutation language model
+... Pretrained XLnet model and pytorch_transformer were used for downstream task. 
 
 ### Model
 
 #### Unit test
-Unit test for basic functionality 
+For unit test
 ```
 $ python3 ./src/test.py
 ```
 
 #### Steps 
 To build a model, run following command that performs following tasks:
-1. Split the given data into train, valid and test in the ratio of 90%, 5%, and 5% 
-2. Introduce montecarlo sampling to train the models with different epochs and
-   learning rate. Select the best model for downstream task.
+1. Split the given data into train (90%), valid (5%) and test(5%). 
+2. Two parameters - # of epoch and learing rate are optimized using montecarlo sampling 
+   and selected the best model. 
 
 #### Usage 
-Help 
-```
-$ python3 ./src/build_model_MedQA.py 
-or 
-$ python3 ./src/build_model_MedQA.py -h
-```
-
 How to run
 ```
 $ python3 ./src/build_model_MedQA.py --end_to_end --data path_to_dir 
 ```
-## Result
+### Serving 
+Best model is used for serving. MXnet is used to top on the pytorch built
+model. Model is uploaded in [S3 bucket](https://aws.amazon.com/blogs/machine-learning/deploying-pytorch-inference-with-mxnet-model-server/)
+The script used for model serving is at ./serving. To serve model:
+```
+$ cd ./serving
+$ ./automate_serving.sh
+```
 
-### Final model
-Final model is uploaded in AWS.
-[modelserver](https://aws.amazon.com/blogs/machine-learning/deploying-pytorch-inference-with-mxnet-model-server/)
+### Inference 
+Go to the (link)[] for inference 
 
-### Model serving 
-steps:
-1. Model serving should be prepared that contains loading model, preprocessing, inference, postprocessing, and output
-  a result.
-2. Using MXnet, convert a model in MXnet understand file format 
-3. 
-# Run the model-archiver on this folder to get the model archive
-$ model-archiver -f --model-name densenet161_pytorch --model-path
-/tmp/model-store --handler pytorch_service:handle --export-path /tmp
+## Future work:
+* Train on more biomedical and healthcare and try to reduce balance variance-bias tradeoff.
+* Mimic Alexa to find an answer quickly in the document. 
 
-
-
-
-## Conclusion
