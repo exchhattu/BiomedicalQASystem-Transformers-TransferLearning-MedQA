@@ -28,10 +28,10 @@ an answer quickly.
 
 ### Data and pre-trained model
 1. [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
-... There are 40K examples for factoid question answer from BioASQ7B. However, unique examples are selected. This resulted 
-... 6K examples. Examples such as yes/no and list questions were also excluded.  Explotratory data analysis is carried out to 
-... understand the distribution. Interesting, same answer appeared in mutliple contexts. Therefore, answer and its appearance 
-... in context is also evaluated. For detail, see a [juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
+...There are 40K examples for factoid question answer from BioASQ7B. However, unique examples are selected. This resulted 
+...6K examples. Examples such as yes/no and list questions were also excluded.  Explotratory data analysis is carried out to 
+...understand the distribution. Interesting, same answer appeared in mutliple contexts. Therefore, answer and its appearance 
+...in context is also evaluated. For detail, see a [juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
 ```
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
@@ -40,7 +40,6 @@ $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ... Pretrained XLnet model and pytorch_transformer were used for downstream task. 
 
 ### Model
-
 #### Unit test
 For unit test
 ```
