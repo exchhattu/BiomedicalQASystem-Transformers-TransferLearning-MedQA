@@ -40,9 +40,10 @@ $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
 
 * [XLnet](https://github.com/zihangdai/xlnet) permutation language model
+
 Pretrained [XLnet model](https://arxiv.org/abs/1906.08237) and pytorch_transformer were used for downstream task. 
 
-### Model management
+### Model building 
 * Unit test
 For unit test
 ```
