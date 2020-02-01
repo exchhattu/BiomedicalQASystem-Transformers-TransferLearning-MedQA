@@ -70,6 +70,23 @@ $ cd ./serving
 $ ./automate_serving.sh
 ```
 
+* Results
+
+Five experiments were carried randomly to avoid biases on data speration and 
+to build robustness model. Furthermore, Monte carlo sampling was used for each experiment 
+to optimize learning rate and epoch. Best model with low loss was kept. This model is
+evaluated with test data and here is summary of result. 
+
+* Validation
+
+| Score | Best  | Average | Std. 
+| ------------- |:-------------:| -----:|
+| F1    | 49.00 | 100.00  |
+| Exact | 46.00 1  2 |
+
+* Blind Test
+
+
 ### Inference 
 Go to the (link)[] for inference 
 
