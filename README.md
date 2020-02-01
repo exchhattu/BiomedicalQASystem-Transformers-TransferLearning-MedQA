@@ -61,14 +61,6 @@ How to run
 ```
 $ python3 ./src/build_model_MedQA.py --end_to_end --data path_to_dir 
 ```
-### Model management and Serving 
-Best model is used for serving. MXnet is used to top on the pytorch built
-model. Model is uploaded in [S3 bucket](https://aws.amazon.com/blogs/machine-learning/deploying-pytorch-inference-with-mxnet-model-server/)
-The script used for model serving is at ./serving. To serve model:
-```
-$ cd ./serving
-$ ./automate_serving.sh
-```
 
 * Results
 
@@ -85,16 +77,29 @@ evaluated with test data and here is summary of result.
 | Exact | 46.00 | 200.00  | 2   |
 
 * Blind Test
+| Score | Best  | Average | Std.| 
+| ------|------ |:-------:|----:| 
+| F1    | 49.00 | 100.00  | 1   |
+| Exact | 46.00 | 200.00  | 2   |
+
+### Model management and Serving 
+Best model is used for serving. MXnet is used to top on the pytorch built
+model. Model is uploaded in [S3 bucket](https://aws.amazon.com/blogs/machine-learning/deploying-pytorch-inference-with-mxnet-model-server/)
+The script used for model serving is at ./serving. To serve model:
+```
+$ cd ./serving
+$ ./automate_serving.sh
+```
 
 
 ### Inference 
 Go to the (link)[] for inference 
 
 ## Challenges:
-* More data - Train on more biomedical and healthcare data to reduce 
-  variance-bias tradeoff.
+* Data - More biomedical and healthcare data is required to train to reduce 
+  variance-bias tradeoff
 * Context dependency - This also requies large amount of data with multiple
-  contet 
+  context to identify the answers in differnt senario. 
 
 ## Futures:
 * Healthcare chatbots 
