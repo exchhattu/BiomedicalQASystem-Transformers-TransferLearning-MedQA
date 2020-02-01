@@ -79,10 +79,10 @@ evaluated with test data and here is summary of result.
 
 * Validation
 
-| Score | Best  | Average | Std. 
-| ------------- |:-------------:| -----:|
-| F1    | 49.00 | 100.00  |
-| Exact | 46.00 1  2 |
+| Score | Best  | Average | Std.| 
+| ------------- |:-------------:| 
+| F1    | 49.00 | 100.00  | 1   |
+| Exact | 46.00 | 200.00  | 2   |
 
 * Blind Test
 
@@ -90,7 +90,12 @@ evaluated with test data and here is summary of result.
 ### Inference 
 Go to the (link)[] for inference 
 
-## Future work:
-* Train on more biomedical and healthcare and try to reduce balance variance-bias tradeoff.
-* Mimic Alexa to find an answer quickly in the document. 
+## Challenges:
+* More data - Train on more biomedical and healthcare data to reduce 
+  variance-bias tradeoff.
+* Context dependency - This also requies large amount of data with multiple
+  contet 
 
+## Futures:
+* Healthcare chatbots 
+* Virtual assistance for healthcare companies
