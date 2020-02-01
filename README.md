@@ -80,7 +80,7 @@ evaluated with test data and here is summary of result.
 * Validation
 
 | Score | Best  | Average | Std.| 
-| ------------- |:-------------:| 
+| ------|------ |:-------:|----:| 
 | F1    | 49.00 | 100.00  | 1   |
 | Exact | 46.00 | 200.00  | 2   |
 
