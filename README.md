@@ -73,8 +73,8 @@ $ ./automate_serving.sh
 * Results
 
 Five experiments were carried randomly to avoid biases on data speration and 
-to build robustness model. Furthermore, Monte carlo sampling was used for each experiment 
-to optimize learning rate and epoch. Best model with low loss was kept. This model is
+to build a robust model. Furthermore, Monte carlo sampling was used for each experiment 
+to optimize learning rate and number of epoch. Best model with low loss was kept. This model is
 evaluated with test data and here is summary of result. 
 
 * Validation
