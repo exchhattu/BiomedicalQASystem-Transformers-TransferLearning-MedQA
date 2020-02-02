@@ -78,7 +78,7 @@ evaluated with test data and here is summary of result.
 
 * Blind Test
 | Score | Best  | Average | Std. | 
-| ------|------ |:-------:|-----:| 
+| ------|-------|:-------:|-----:| 
 | Exact | 51.03 |    46.00| 4.39 |
 | F1    | 53.17 |    48.84| 3.81 |
 
