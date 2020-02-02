@@ -45,9 +45,8 @@ Pretrained [XLnet model](https://arxiv.org/abs/1906.08237) and pytorch_transform
 
 ### Model building 
 #### Unit test
-For unit test
 ```
-$ python3 ./src/test.py
+$ test.sh 
 ```
 
 #### Overview 
@@ -57,7 +56,6 @@ To build a model, run following command that performs following tasks:
    and selected the best model. 
 
 #### Usage 
-How to run
 ```
 $ ./MedQA.sh 
 ```
