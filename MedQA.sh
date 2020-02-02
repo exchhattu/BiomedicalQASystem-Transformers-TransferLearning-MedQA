@@ -1,6 +1,10 @@
 #!/bin/sh
 
+###
+download a dataset 
+
 SQUAD_DIR=`pwd` 
+InputData= #please download and put here a path
 
 i=1
 while [ $i -le 6 ];
@@ -11,7 +15,7 @@ do
    # MedQA protocol
    # data 
    python3 $SQUAD_DIR/src/MedQA.py \
-	--data $SQUAD_DIR/InputData \
+	--data $SQUAD_DIR/$InputData \
    	--outdir split_train_valid
 
    if [ ! -f $SQUAD_DIR/split_train_valid/train.json ]
