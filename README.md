@@ -71,16 +71,16 @@ evaluated with test data and here is summary of result.
 
 * Validation
 
-| Score | Best  | Average | Std.| 
-| ------|------ |:-------:|----:| 
-| F1    | 49.00 | 100.00  | 1   |
-| Exact | 46.00 | 200.00  | 2   |
+| Score | Best  | Average | Std. | 
+| ------|------ |:-------:|------| 
+| Exact | 51.58 |    47.82| 2.67 |
+| F1    | 53.32 |    50.46| 2.19 |
 
 * Blind Test
-| Score | Best  | Average | Std.| 
-| ------|------ |:-------:|----:| 
-| F1    | 49.00 | 100.00  | 1   |
-| Exact | 46.00 | 200.00  | 2   |
+| Score | Best  | Average | Std. | 
+| ------|------ |:-------:|-----:| 
+| Exact | 51.03 |    46.00| 4.39 |
+| F1    | 53.17 |    48.84| 3.81 |
 
 ### Model management and Serving 
 Best model is used for serving. MXnet is used to top on the pytorch built
