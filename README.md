@@ -44,25 +44,25 @@ $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 Pretrained [XLnet model](https://arxiv.org/abs/1906.08237) and pytorch_transformer were used for downstream task. 
 
 ### Model building 
-* Unit test
+#### Unit test
 For unit test
 ```
 $ python3 ./src/test.py
 ```
 
-* Overview 
+#### Overview 
 To build a model, run following command that performs following tasks:
-1. Split the given data into train (90%), valid (5%) and test(5%). 
+1. Randomly split the given data into train (90%), valid (5%) and test(5%). 
 2. Two parameters - # of epoch and learing rate are optimized using montecarlo sampling 
    and selected the best model. 
 
-* Usage 
+#### Usage 
 How to run
 ```
-$ python3 ./src/build_model_MedQA.py --end_to_end --data path_to_dir 
+$ ./MedQA.sh 
 ```
 
-* Results
+#### Results
 
 Five experiments were carried randomly to avoid biases on data speration and 
 to build a robust model. Furthermore, Monte carlo sampling was used for each experiment 
