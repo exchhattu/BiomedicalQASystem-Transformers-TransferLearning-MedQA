@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "paragraphs": [
+        {
+          "qas": [
+            {
+              "id": "56bc751eac7ad10019000013_001",
+              "question": "Name synonym of Acrokeratosis paraneoplastica.",
+              "answers": [
+                {
+                  "text": "Bazex syndrome",
+                  "answer_start": 31
+                }
+              ]
+            }
+          ],
+          "context": "Acrokeratosis paraneoplastica (Bazex syndrome): report of a case associated with small cell lung carcinoma and review of the literature. Acrokeratosis paraneoplastic (Bazex syndrome) is a rare, but distinctive paraneoplastic dermatosis characterized by erythematosquamous lesions located at the acral sites and is most commonly associated with carcinomas of the upper aerodigestive tract. We report a 58-year-old female with a history of a pigmented rash on her extremities, thick keratotic plaques on her hands, and brittle nails. Chest imaging revealed a right upper lobe mass that was proven to be small cell lung carcinoma. While Bazex syndrome has been described in the dermatology literature, it is also important for the radiologist to be aware of this entity and its common presentations."
+        },
+        {
+          "qas": [
+            {
+              "id": "56bc751eac7ad10019000013_002",
+              "question": "Name synonym of Acrokeratosis paraneoplastica.",
+              "answers": [
+                {
+                  "text": "Bazex syndrome",
+                  "answer_start": 167
+                }
+              ]
+            }
+          ],
+          "context": "Acrokeratosis paraneoplastica (Bazex syndrome): report of a case associated with small cell lung carcinoma and review of the literature. Acrokeratosis paraneoplastic (Bazex syndrome) is a rare, but distinctive paraneoplastic dermatosis characterized by erythematosquamous lesions located at the acral sites and is most commonly associated with carcinomas of the upper aerodigestive tract. We report a 58-year-old female with a history of a pigmented rash on her extremities, thick keratotic plaques on her hands, and brittle nails. Chest imaging revealed a right upper lobe mass that was proven to be small cell lung carcinoma. While Bazex syndrome has been described in the dermatology literature, it is also important for the radiologist to be aware of this entity and its common presentations."
+        }
+      ],
+      "title": "BioASQ6b"
+    }
+  ],
+  "version": "BioASQ6b"
+}
