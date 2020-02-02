@@ -6,15 +6,11 @@ Wed Jan 22 07:11:37 2020
 import os
 import json
 import numpy as np
+import collections
 
 from pytorch_transformers import XLNetModel, XLNetTokenizer
 from pytorch_transformers import AdamW
-
-
 from PyTorch_transform_wrapper import PyTorchTransformWrapper
-
-import collections
-
 
 class InputData:
 
@@ -69,7 +65,6 @@ class InputData:
         for example in self._qa_data.values():
             all_examples += example
             print("INFO: after merging %d new dim. %d " %(len(example), len(all_examples)))
-            break
       
         t_ratio = ratio.split(":") 
         # split train, valid, test 
@@ -81,7 +76,7 @@ class InputData:
         n_test  = int(n_samples * float(t_ratio[2])/10.0)  
 
         self._train_examples = np.array(all_examples)[a_random_idx[:n_train]]
-        self._valid_examples = np.array(all_examples)[a_random_idx[n_train+1:n_train+n_valid]]
+        self._valid_examples = np.array(all_examples)[a_random_idx[n_train:n_train+n_valid]]
         self._test_examples = []
         if n_test > 0: self._test_examples = np.array(all_examples)[a_random_idx[-n_test:]]
         
