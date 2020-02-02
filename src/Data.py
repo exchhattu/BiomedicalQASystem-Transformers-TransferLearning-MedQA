@@ -13,7 +13,7 @@ import xml.etree.ElementTree as etree
 
 # data science/AI
 import pandas as pd
-from DataEncode import InputData 
+from PyTransInputData import InputData
 import torch
 from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
                               TensorDataset)
@@ -23,6 +23,9 @@ class MedicalData:
 
     class QuestionPair:
         def __init__(self, id, question, answer, qtype, keyword):
+            """
+            Class prototype
+            """
             self._id = id 
             self._question  =  question 
             self._answer    =  answer 
