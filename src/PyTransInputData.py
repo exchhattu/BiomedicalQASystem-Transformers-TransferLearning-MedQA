@@ -51,10 +51,15 @@ class InputData:
             o_pytorch.read_squad_formatted_json_file(s_fpath) 
             self._qa_data[s_data_name] = o_pytorch._qa_data 
 
-    def merge_and_split_data(self, ratio="8:1:1", write_file=False):
+    def merge_and_split_data(self, ratio="8:1:1", outdir = "split_train_valid", write_file=False):
         """
         merge a data collected from multiple files and divide
         subsequently into train, test, and validation randomly
+
+        params:
+            ratio: % of examples in training, validation, and testing
+            output_dir: path to output directory 
+            write_file: True means write on file 
         """
         self._train_examples = []
         self._test_examples = []
@@ -62,7 +67,6 @@ class InputData:
 
         all_examples = []
         for example in self._qa_data.values():
-            print("Coding: ", len(example))
             all_examples += example
             print("INFO: after merging %d new dim. %d " %(len(example), len(all_examples)))
             break
@@ -86,11 +90,11 @@ class InputData:
         print("INFO: test data %d (%0.2f)" %(len(self._test_examples), 10.00*float(t_ratio[2])))
 
         if write_file:
-            self._path_to_dir = os.path.join(os.getcwd(), "split_train_valid") 
+            self._path_to_dir = os.path.join(os.getcwd(), outdir) 
             if not os.path.exists(self._path_to_dir):  os.mkdir(self._path_to_dir)
-            self._write_json_file(self._valid_examples, os.path.join(self._path_to_dir, "train.json"))
+            self._write_json_file(self._train_examples, os.path.join(self._path_to_dir, "train.json"))
             self._write_json_file(self._valid_examples, os.path.join(self._path_to_dir, "valid.json"))
-            self._write_json_file(self._valid_examples, os.path.join(self._path_to_dir, "test.json"))
+            self._write_json_file(self._test_examples, os.path.join(self._path_to_dir, "test.json"))
 
     def _write_json_file(self, examples, file_name = "predict.json"):
         """
@@ -111,13 +115,13 @@ class InputData:
             # print(example.doc_tokens)
 
             d_answer = {'text': example.orig_answer_text, 
-                        'answer_start' : example.start_position }
+                        'answer_start' : example.orig_start_position }
             # changed qas_id to id since original file format contains id rather than qas_id
             d_sub_data = { "id": example.qas_id,
                            "question": example.question_text,
                            "answers": [d_answer],
                             }
-            d_data = {"qas": [d_sub_data], "context": " ".join(example.doc_tokens) }
+            d_data = {"qas": [d_sub_data], "context": example.context }
             t_data.append(d_data)
         d_paragraph = {"paragraphs": t_data} 
         d_final_data = {"data": [d_paragraph]}
