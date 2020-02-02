@@ -19,12 +19,12 @@ def train_valid_cmd(path_to_train, path_to_test):
 
     default_args = ( "python3",  program_path, \
               "--overwrite_cache",  "--overwrite_output_dir", "--model_type", "xlnet", 
-              "--model_name_or_path", "xlnet-base-cased", "--output_dir", "output_logs" 
+              "--model_name_or_path", "xlnet-base-cased", "--output_dir", "output_logs", 
               "--do_lower_case",  "--learning_rate", "3e-5",  
               "--num_train_epochs", "5", "--max_seq_length", "192", 
               "--doc_stride", "128", "--train_file", path_to_train,
               "--predict_file", path_to_test, "--do_train", "--do_eval",
-              "--num_sample", "10")
+              "--num_sample", "2")
     return default_args
 
 
