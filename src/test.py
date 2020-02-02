@@ -1,4 +1,5 @@
 '''
+Rojan Shrestha
 @ Insight Data Science
 Wed Jan 15 11:38:19 2020
 
@@ -7,20 +8,21 @@ Test cases
 import os
 
 from Data import MedicalData 
+from Data import InputData 
 from QADataModel import QaDataModel
 
 def test_xml_parser():
     o_mdata = MedicalData()
     # parsing xml file
-    o_mdata.parse_xml_input("./unittest/test1/0000001.xml", \
+    o_mdata.parse_xml_input("./unittest/data/0000001.xml", \
                             is_debug=True)
 
-    icount = o_mdata.parse_xmls("./unittest/test1/", True)
+    icount = o_mdata.parse_xmls("./unittest/data/", True)
     assert icount == 3
+    print("***Passed XML parser***")
 
     # parsing excel file
-    o_mdata.parse_excel_file("./unittest/test2/test_MedInfo2019-QA-Medications.xlsx", 
-                             True)
+    o_mdata.parse_excel_file("./unittest/data/test_MedInfo2019-QA-Medications.xlsx", True)
 
     # result
     o_qa_result = o_mdata._test_conds['excel_parser'] 
@@ -42,26 +44,16 @@ def test_xml_parser():
     ## Case4 - keyword
     assert o_qa_result._keyword=="desonide ointment" 
 
-    print("Passed excel parsing.")
+    print("***Passed excel parsing***")
 
 def test_json_parser():
-    o_mdata = MedicalData()
-    num_qas = o_mdata.parse_json_file("./unittest/test3_json/BioASQ_factoid-6b.json", True)
-    assert num_qas == 4772
-    print("Passed json parsing.")
+    o_mdata = InputData("./unittest/data/json/")
+    o_mdata.merge_and_split_data(ratio="5:5:0", outdir = "json_test", write_file=True)
 
-    o_mdata.write_json_file(os.getcwd(), file_name = "train.json")
-    assert os.path.exists(os.path.join(os.getcwd(), "train.json")) == True
-
-    dataset, qa_pairs = o_mdata.test()
-    qmodel = QaDataModel(dataset, qa_pairs)
-
-def test_QA_dmodel():
-    qmodel, qa_pairs = QaDataModel()
+    assert len(o_mdata._train_examples)==1
+    assert len(o_mdata._valid_examples)==1
+    print("===Passed json parsing===")
 
 # call test cases
 test_xml_parser()
 test_json_parser()
-# test_QA_dmodel()
-
-
