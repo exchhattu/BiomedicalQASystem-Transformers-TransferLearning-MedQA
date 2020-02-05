@@ -82,20 +82,27 @@ evaluated with test data and here is summary of result.
 | F1    | 53.17 |    48.84| 3.81 |
 
 ### Model management and Serving 
-Best model is used for serving. MXnet is used to top on the pytorch built
-model. Model is uploaded in [S3 bucket](https://aws.amazon.com/blogs/machine-learning/deploying-pytorch-inference-with-mxnet-model-server/)
-The script used for model serving is at ./serving. To serve model:
+Best model is used for serving. [Flask](https://www.palletsprojects.com/p/flask/), 
+[Nginx](https://www.nginx.com), [gunicorn](https://gunicorn.org), and [AWS](https://aws.amazon.com) 
+are used for serving. Server setup is carried out as suggested in a 
+[link](https://www.e-tinkers.com/2018/08/how-to-properly-host-flask-application-with-nginx-and-guincorn/).
+After completion of server setup, run the following command to start the
+server.  
+
+Server side 
+
 ```
-$ cd ./serving
-$ ./automate_serving.sh
+$ cd PATH_TO_WORK_DIR_IN_SERVER # change accordingly 
+$ ./start_server.sh 
 ```
 
-
-### Inference 
-Go to the (link)[] for inference 
+Client side
+If server runs in AWS, client can request a job 
+* Open browser (tested on Safari and Chrome)
+* Copy http://54.87.194.39 into browser 
 
 ## Challenges:
-* Data - More biomedical and healthcare data is required to train to reduce 
+* Data - More biomedical and healthcare data are required to train to reduce 
   variance-bias tradeoff
 * Context dependency - This also requies large amount of data with multiple
   context to identify the answers in differnt senario. 
