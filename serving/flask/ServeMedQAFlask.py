@@ -26,8 +26,8 @@ from utils_squad import (read_squad_examples, convert_examples_to_features,
                          RawResultExtended, write_predictions_extended,
                          get_final_text, _compute_softmax)
 
-from flask import Flask, jsonify, request, render_template
-app = Flask(__name__)
+# from flask import Flask, jsonify, request, render_template
+# app = Flask(__name__)
 
 class MedQAInference:
 
@@ -40,6 +40,12 @@ class MedQAInference:
                                     torch.cuda.is_available() else "cpu")
         
     def initialize(self, path_to_model):
+        """
+        initialize object
+
+        params:
+            path_to_model: pretrain model
+        """
         model_class = XLNetForQuestionAnswering
         tokenizer_class = XLNetTokenizer
         self._model = model_class.from_pretrained(path_to_model)
@@ -47,6 +53,13 @@ class MedQAInference:
         self._model.to(self._device)
 
     def preprocess_data(self, path_to_stream, input_question):
+        """
+        preprocess input data
+
+        params:
+            path_to_stream: document content 
+            input_question: input file
+        """
         examples = read_squad_examples(input_stream=path_to_stream, 
                                         is_training=False, 
                                         version_2_with_negative=False,
@@ -70,16 +83,26 @@ class MedQAInference:
         return examples, features, dataset
 
     def to_list(self, tensor):
+        """
+        Helper function - convert tensor to list
+        params:
+            tensor: input tensor
+        """
         return tensor.detach().cpu().tolist()
 
     def inference(self, dataset, example, feature):
+        """
+        Inference
+
+        Params:
+            dataset: data for prediction
+            example:
+            feature: 
+        """
+
         eval_dataloader = DataLoader(dataset, batch_size=1)
-        print("Coding: test ", len(eval_dataloader))
         all_results = []
         for batch in eval_dataloader:
-            print("Coding: ", len(batch))
-            print("Coding: batch ", batch)
-            
             self._model.eval()
             # batch =  tuple(t.to(self._device) for t in batch)
             with torch.no_grad():
@@ -102,31 +125,48 @@ class MedQAInference:
                                        end_top_log_probs    = self.to_list(outputs[2][i]),
                                        end_top_index        = self.to_list(outputs[3][i]),
                                        cls_logits           = self.to_list(outputs[4][i]))
-            print("Coding: ", result)
             all_results.append(result)
         return all_results
             
 
     def postprocess(self, all_examples, all_features, all_results):
+        """
+        Postprocessing step. The code is borrowed and refactored.
+
+        Params:
+            all_examples: list of examples
+            all_features: list of features 
+            all_results: list of results
+        """
         example_index_to_features = collections.defaultdict(list)
-        for feature in all_features:
-            example_index_to_features[feature.example_index].append(feature)
+        if not len(all_features) == 1 or not len(all_examples) == 1 or not len(all_results)==1: 
+            return None
+
+        feature = all_features[0]
+        example_index_to_features[feature.example_index].append(feature)
 
         unique_id_to_result = {}
-        print("Coding: leng ", all_results, len(all_results))
-        if not all_results: return None
         result = all_results[0]
         unique_id_to_result[result.unique_id] = result
 
-        for (example_index, example) in enumerate(all_examples):
-            print("Coding: a b ", example_index, all_examples)
-            features = example_index_to_features[example_index]
-            nbest, prob = self.__prelim_pred(all_features, unique_id_to_result, example)
-            print("example ", example_index, example, nbest, prob)
+        example_index = 0 
+        example = all_examples[0]
+        features = example_index_to_features[example_index]
+        nbest, prob = self.__prelim_pred(features, unique_id_to_result, all_features, example)
+        return nbest[0].text
 
-    def __prelim_pred(self, features, unique_id_to_result, example):
-        start_n_top = self._model.config.start_n_top 
-        end_n_top = self._model.config.end_n_top
+    def __prelim_pred(self, features, unique_id_to_result, all_features, example):
+        """
+        Gathered preliminary data and preprocessed 
+
+        Params:
+            features: selected feature given id
+            unique_id_to_result: unique id
+            all_features: list of feature
+            example: list 
+        """
+        start_n_top     = self._model.config.start_n_top 
+        end_n_top       = self._model.config.end_n_top
         max_answer_length = 30 
 
         _PrelimPrediction = collections.namedtuple( "PrelimPrediction",
@@ -171,12 +211,19 @@ class MedQAInference:
         prelim_predictions = sorted(prelim_predictions,
                                     key=lambda x: (x.start_log_prob + x.end_log_prob),
                                     reverse=True)
-        print("Coding: prelim_predictions ", prelim_predictions )
-        nbest = self.__token_parsing(prelim_predictions, features, example)
+        nbest = self.__token_parsing(prelim_predictions, all_features, example)
         probs = self.__get_nbest_prob(nbest)
         return nbest, probs
 
     def __token_parsing(self, prelim_predictions, all_features, example):
+        """
+        Parse the preliminary predicated result
+
+        Params:
+            prelim_predictions: tuples
+            all_features: features of predicted content
+            example: selected feature 
+        """
         n_best_size = 20
         seen_predictions = {}
         nbest = []
@@ -199,7 +246,6 @@ class MedQAInference:
             final_text = get_final_text(tok_text, orig_text, self._tokenizer.do_lower_case, verbose_logging) 
             if final_text in seen_predictions: continue
             seen_predictions[final_text] = True
-            print("Coding: final ", final_text)
             nbest.append(_NbestPrediction(text=final_text,
                                           start_log_prob=pred.start_log_prob,
                                           end_log_prob=pred.end_log_prob))
@@ -229,39 +275,36 @@ class MedQAInference:
 
 
 
-meq_qa_inference = MedQAInference()
-path_to_model="../backup_model/"
-# url="https://medqa.s3.amazonaws.com/"
-# path_to_model = requests.get(url).json()
-meq_qa_inference.initialize(path_to_model)
-
-
-def get_prediction(path_to_file, input_question):
-    # data = "interence.json"
-    examples, features, dataset =  meq_qa_inference.preprocess_data(path_to_file, input_question)
-    all_results = meq_qa_inference.inference(dataset, examples, features)
-    data = meq_qa_inference.postprocess(examples, features, all_results)
-    return data
-
-@app.route("/", methods=['GET', 'POST'])
-def predict():
-    if request.method=='POST': 
-        if 'file' not in request.files:
-            return redirect(request.url)
-        # file = request.files.get('file')
-        file = request.files['file']
-        print("Coding: file ", file)
-        # if not file:
-        #     return
-        # print(a)
-        input = request.form['Question']
-        print("Coding: input ", input)
-        print("Coding: inside data ", file.stream)
-    
-        pred_txt = get_prediction(file.stream, input)
-        return render_template('result.html', question=input, answer=pred_txt)
-    return render_template('index.html')
-
-if __name__=='__main__':
-    app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
-    # app.run(debug=True)
+# meq_qa_inference = MedQAInference()
+# path_to_model="../backup_model/"
+# # url="https://medqa.s3.amazonaws.com/"
+# # path_to_model = requests.get(url).json()
+# meq_qa_inference.initialize(path_to_model)
+# 
+# 
+# def get_prediction(path_to_file, input_question):
+#     # data = "interence.json"
+#     examples, features, dataset =  meq_qa_inference.preprocess_data(path_to_file, input_question)
+#     all_results = meq_qa_inference.inference(dataset, examples, features)
+#     data = meq_qa_inference.postprocess(examples, features, all_results)
+#     return data 
+# 
+# @app.route("/", methods=['GET', 'POST'])
+# def predict():
+#     if request.method=='POST': 
+#         print("Coding: hi ", request)
+#         if 'file' not in request.files:
+#             return redirect(request.url)
+#         # file = request.files.get('file')
+#         file = request.files['file']
+#         if not file: return
+#         input = request.form['Question']
+#         if not input: return
+#         data = get_prediction(file.stream, input)
+#         return render_template('result.html', question=input, answer=data)
+#     return render_template('index.html')
+# 
+# if __name__=='__main__':
+#     # app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
+#     app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
+#     # app.run(debug=True)
