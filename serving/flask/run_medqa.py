@@ -30,8 +30,6 @@ app = Flask(__name__)
 
 meq_qa_inference = MedQAInference()
 path_to_model="./model/"
-# url="https://medqa.s3.amazonaws.com/"
-# path_to_model = requests.get(url).json()
 meq_qa_inference.initialize(path_to_model)
 
 
@@ -39,9 +37,9 @@ def get_prediction(path_to_file, input_question):
     start_time = time.time()
     examples, features, dataset =  meq_qa_inference.preprocess_data(path_to_file, input_question)
     all_results = meq_qa_inference.inference(dataset, examples, features)
-    data = meq_qa_inference.postprocess(examples, features, all_results)
+    data, prob = meq_qa_inference.postprocess(examples, features, all_results)
     elapsed_time = time.time() - start_time
-    return data, elapsed_time 
+    return data, elapsed_time, prob 
 
 @app.route("/", methods=['GET', 'POST'])
 def predict():
@@ -49,16 +47,13 @@ def predict():
         print("Coding: hi ", request)
         if 'file' not in request.files:
             return redirect(request.url)
-        # file = request.files.get('file')
         file = request.files['file']
         if not file: return
         input = request.form['Question']
         if not input: return
-        data, etime = get_prediction(file.stream, input)
-        return render_template('result.html', question=input, answer=data, con_time = etime)
+        data, etime, prob = get_prediction(file.stream, input)
+        return render_template('result.html', question=input, answer=data, con_time = "%0.2f sec" %etime, prob= "%0.2f" %prob)
     return render_template('index.html')
 
 if __name__=='__main__':
-    # app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
     app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
-    # app.run(debug=True)
