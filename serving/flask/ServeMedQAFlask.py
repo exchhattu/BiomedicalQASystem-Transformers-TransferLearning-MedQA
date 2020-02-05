@@ -152,8 +152,9 @@ class MedQAInference:
         example_index = 0 
         example = all_examples[0]
         features = example_index_to_features[example_index]
+        print("Coding: features ", features)
         nbest, prob = self.__prelim_pred(features, unique_id_to_result, all_features, example)
-        return nbest[0].text
+        return nbest[0].text, prob[0]
 
     def __prelim_pred(self, features, unique_id_to_result, all_features, example):
         """
