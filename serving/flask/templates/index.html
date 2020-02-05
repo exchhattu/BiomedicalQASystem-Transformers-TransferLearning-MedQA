@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+
+<!--<script src="js/script.js"></script>-->
+<style src="/static/css/styles.css"></style>
+<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+<style type="/text/css">
+  body {
+    background-color: #BDB76B;
+  }
+  h1 {
+    font-family: Arial;
+    font-size: 50px;
+    font-style: normal;
+    font-weight: 150;
+    text-align: center;
+
+  }
+
+  h2 {
+    font-family: sans-serif;
+    font-size: 30px;
+    font-style: bold;
+    font-weight: 200;
+    text-align: justify;
+    text-indent: 20px;
+
+  }
+
+  input[type=text] {
+    width: 130%;
+    border: 4px solid #aaa;
+    border-radius: 4px;
+    margin: 14px 0;
+    outline: none;
+    padding: 60px;
+    box-sizing: border-box;
+    transition: 3s;
+  }
+
+  input[type=text]:focus{
+    border-color: dodgerBlue;
+    box-shadow: 0 0 8px 0 dodgerBlue;
+  }
+
+  button[type=button]{
+    width: 8%;
+    border: 4px solid #aaa;
+    border-radius: 4px;
+    margin: 8px 0;
+    outline: none;
+    padding: 6px;
+    box-sizing: border-box;
+    transition: 3s;
+  }
+
+</style>
+</head>
+
+<body class="text-center">
+  <h1>MedQA</h1>
+  <br/>
+  <form class="form-signin" method=post enctype=multipart/form-data align="center">
+
+     <input type="file" name="file" class="form-control-file" id="inputfile">
+
+  <div class="form-group row">
+    <label "inputquestion" class="col-sm-2 col-form-label">Ask me</label>
+    <div class="col-sm-10">
+    <input type="text" name="Question" class="form-control" id="inputquestion" placeholder="Type">
+  </div>
+
+     <!<input type="text" name="Question" placeholder="Type">
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Upload</button>
+  </form>
+  <script src="//code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+  <script src="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+      $('#inputfile').bind('change', function() {
+          let fileSize = this.files[0].size/1024/1024; // this gives in MB
+          if (fileSize > 1) {
+             $("#inputfile").val(null);
+             alert('file is too big. images more than 1MB are not allowed')
+             return
+          }
+
+          let ext = $('#inputfile').val().split('.').pop().toLowerCase();
+          if($.inArray(ext, ['json']) == -1) {
+              $("#inputfile").val(null);
+              alert('only json file is allowed!');
+          }
+       });
+   </script>
+</body>
+</html>
