@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "paragraphs": [
+        {
+      "qas": [
+            {
+              "id": "001",
+              "question": "",
+              "answers": [
+                {
+                  "text": "",
+                  "answer_start":12000 
+                }
+              ]
+            }
+          ],
+          "context": "Endocrine abnormalities including growth hormone deficiency, adrenal insufficiency, glucose intolerance, parathyroid adenoma with hyperprolactinemia and hypoglycemia have been described. Hypoglycemia has been documented due to growth hormone and cortisol deficiency." 
+        }
+      ],
+      "title": "BioASQ6b"
+    }
+  ],
+  "version": "BioASQ6b"
+}
