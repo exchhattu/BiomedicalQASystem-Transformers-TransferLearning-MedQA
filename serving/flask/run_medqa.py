@@ -44,7 +44,6 @@ def get_prediction(path_to_file, input_question):
 @app.route("/", methods=['GET', 'POST'])
 def predict():
     if request.method=='POST': 
-        print("Coding: hi ", request)
         if 'file' not in request.files:
             return redirect(request.url)
         file = request.files['file']
