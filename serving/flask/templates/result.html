@@ -6,37 +6,60 @@
     <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" rel="stylesheet">
     <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-      }
-
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
+        .bd-placeholder-img {
+          font-size: 1.125rem;
+          text-anchor: middle;
         }
-      }
-    </style>
-    <link rel="stylesheet" href="/static/style.css">
 
+        @media (min-width: 768px) {
+          .bd-placeholder-img-lg {
+            font-size: 3.5rem;
+          }
+        }
+    </style>
+    <style>
+        .form-control {height:40px; width:500px !important}
+
+        body {
+          text-align: center;
+          vertical-align: middle;
+        }
+
+        div.settings {
+          width: 500px;
+          margin-left: calc(50vw - 250px);
+          text-align:center;
+          display:grid;
+          grid-template-columns: max-content max-content;
+          grid-gap:5px;
+        }
+        div.settings label       { text-align:left; }
+        div.settings label:after { content: ":"; }
+
+        .answer {
+          text-align: left;
+        }
+    </style>
     <title>MedQAResult</title>
+    <h1>MedQA</h1>
   </head>
-  <body class="text-center">
+  <body>
     <form class="form-signin" method=post enctype=multipart/form-data>
-        <h1 class="h3 mb-3 font-weight-normal">MedQA</h1>
-        <br>
-        <br>
-        <h5 class="h5 mb-3 font-weight-normal">Question: {{ question }}</h5>
-        <h5 class="h5 mb-3 font-weight-normal">Predicted answer: {{ answer }} ({{ prob }})</h5>
-        <br>
-        <h5 class="h5 mb-3 font-weight-normal">Elapsed time: {{ con_time }}</h5>
+        <div class="settings" >
+            <label>Question</label>
+            <span class="answer">{{question}}</span>
+            <label>Answer</label>
+            <span class="answer">{{answer}}</span>
+            <label>Probability</label>
+            <span class="answer">{{prob}}</span>
+            <label>Elapsed time</label>
+            <span class="answer">{{con_time}}</span>
+        </div>
+
         <div class="social-icons">
             <a href="https://github.com/exchhattu/MedQA" target="_blank">
             <i class="fab fa-github fa-3x"></i>
         </div>
     </form>
-    <script src="//code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-    <script src="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
   </body>
 </html>
