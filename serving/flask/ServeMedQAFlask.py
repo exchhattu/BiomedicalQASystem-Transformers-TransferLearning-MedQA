@@ -34,8 +34,6 @@ class MedQAInference:
     def __init__(self):
         self._initialized = False 
         self._model = None
-        self._device = "cpu"
-        # GPU might be costly
         self._device = torch.device("cuda" if \
                                     torch.cuda.is_available() else "cpu")
         
