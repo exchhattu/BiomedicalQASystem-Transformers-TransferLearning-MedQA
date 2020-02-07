@@ -19,6 +19,22 @@
   .form-control {height:40px; width:500px !important}
 </style>
 </head>
+<script type="text/javascript">
+    function check_empty() {
+      if (document.getElementById('inputquestion').value==""
+          || document.getElementById('inputquestion').value==undefined) {
+          alert ("Please write a question");
+          return false;
+      }
+      var nme = document.getElementById("inputfile");
+      if(nme.value.length < 1) {
+          alert('Must select a file for upload!');
+          nme.focus();
+          return false;
+      }
+      return true;
+   }
+</script>
 
 
 <body class="text-center">
@@ -32,7 +48,7 @@
       <br>
       <label for="inputquestion">Question</label>
       <input type="text" name="Question" class="form-control" id="inputquestion" placeholder="Type" value="Which hormone deficiency is implicated in the Costello syndrome?">
-      <button class="btn btn-md btn-primary" type="submit">Upload</button>
+      <button class="btn btn-md btn-primary" onclick="return check_empty();" type="submit">Upload</button>
       <br>
       <br>
     </div>
@@ -47,7 +63,6 @@
 <script src="//code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 <script src="//stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-
   <script type="text/javascript">
       $('#inputfile').bind('change', function() {
           let ext = $('#inputfile').val().split('.').pop().toLowerCase();
@@ -56,6 +71,8 @@
               alert('only json file is allowed!');
           }
        });
+
+      
    </script>
 </body>
 </html>
