@@ -67,7 +67,7 @@ To build a model, the following steps were performed:
 2. Training
     * Two hyperparameters (# of epoch and very-small learning rate) are optimized 
       and selected the best model.
-    * Frooze transformer layers and train the last linear layer only.
+    * Freeze transformer layers and train the last linear layer only.
     * The models are trained at AWS using EC2 instance (p2.xlarge).    
 
 #### Usage 
