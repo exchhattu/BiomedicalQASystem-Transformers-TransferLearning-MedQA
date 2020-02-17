@@ -29,7 +29,7 @@ the specific downstream goal from the biomedical field.
 ![alt text](https://github.com/exchhattu/MedQA/blob/master/images/pipeline.png)
 
 ### Data and pre-trained model
-* [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
+#### Data - [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
 
 There are 40K examples for factoid question answer from BioASQ7B. 
 However, unique examples were selected. This resulted in 6K examples. 
@@ -44,7 +44,7 @@ The input for EDA is generated using the following program
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
 
-* pre-trained Models 
+#### Pre-trained Models 
 Multiple [pre-trained models](https://rajpurkar.github.io/SQuAD-explorer/) are available. 
 Few pre-trained models could be selected for fine-tuning but only 
 [XLNet](https://github.com/zihangdai/xlnet) was chosen due to the time constraint. 
