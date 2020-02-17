@@ -1,27 +1,29 @@
-# MedQA - an automated medical question answer system
-Aritifical intelligence in health create aims to ease a task easy and fast. In
-addition, it can also provide integrated platform to connect professionals who
-are in the system such as doctors, patients, scientists, and others. One
-of tasks could be to design the automated system in which doctor can find
-relevant records in patient note quickly. Similar technology also can be used by other
-medical professional such as researchers, clinicians, and pharamacists to get
-an answer quickly. 
+# MedQA - an automated biomedical question-answer system (Insight Data Science Project)
+Artificial intelligence in the biomedical field aims to ease a task easy and fast. 
+One of the time-consuming tasks for biomedical professionals is to read articles. 
+This is because there are already 30M articles published and on average 3,000 new 
+articles/day are published. Second, it takes a few hours to read an article. 
+Due to the incomprehensible amount of data, there is a necessity of an AI-powered 
+automated system to speed-up the query from the research articles. MedQA is 
+NLP (natural language processing) powered automated question answering system 
+that seeks a question and a document as input and outputs a predicted answer within a few seconds. 
 
 ## Requirements:
-* Python version 3.0+
+* Python (3.0+)
 * NumPy
 * Pandas
 * PyTorch
 * [Transformers](https://github.com/huggingface/transformers)
 * [PyTorch-Transformers](https://github.com/rusiaaman/pytorch-transformers) 
+* Flask
 
 
 ## Motivation:
-* Design a platfrom, automated question answering system for health care domain.
-* Implement transfer learning to understand how generic pretrained model can be
-  use in different domain. 
-* Fine-tune generic models trained on large corpus for specific downstream
-  goal. 
+* Natural Language Processing - design a tool, automated question answering system 
+for biomedical professionals, using AI-powered NLP.
+* Transfer Learning - fine-tune generic models trained on the large corpus to achieve 
+the specific downstream goal from the biomedical field.
+* Model Deployment - serve a model to the users through WebApp.
 
 ## Pipeline:
 ![alt text](https://github.com/exchhattu/MedQA/blob/master/images/pipeline.png)
@@ -29,19 +31,26 @@ an answer quickly.
 ### Data and pre-trained model
 * [BioASQ](https://github.com/dmis-lab/bioasq-biobert)
 
-There are 40K examples for factoid question answer from BioASQ7B. However, unique examples are selected. This resulted 
-6K examples. Examples such as yes/no and list questions were also excluded.  Explotratory data analysis is carried out to 
-understand the distribution. Interesting, same answer appeared in mutliple contexts. Therefore, answer and its appearance 
-in context is also evaluated. 
+There are 40K examples for factoid question answer from BioASQ7B. 
+However, unique examples were selected. This resulted in 6K examples. 
+Examples such as yes/no and list questions were also excluded.  
+Exploratory data analysis (EDA) was carried out to understand the distribution 
+of the length of sequences in questions, documents, and answers. Detail
+analysis for EDA can be found in a 
+[juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
 
-For detail, see a [juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
+The input for EDA is generated using the following program 
 ```
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
 
-* [XLnet](https://github.com/zihangdai/xlnet) permutation language model
-
-Pretrained [XLnet model](https://arxiv.org/abs/1906.08237) and pytorch_transformer were used for downstream task. 
+* pre-trained Models 
+Multiple [pre-trained models](https://rajpurkar.github.io/SQuAD-explorer/) are available. 
+Few pre-trained models could be selected for fine-tuning but only 
+[XLNet](https://github.com/zihangdai/xlnet) was chosen due to the time constraint. 
+XLNet was selected among others since it permutes the input sequence to capture the 
+dependency of token that otherwise very difficult. [XLnet model](https://arxiv.org/abs/1906.08237) 
+and pytorch_transformer were used for the downstream task. 
 
 ### Model building 
 #### Unit test
