@@ -33,12 +33,13 @@ the specific downstream goal from the biomedical field.
 
 There are 40K examples for factoid question answer from BioASQ7B. 
 However, unique examples were selected. This resulted in 6K examples. 
-Examples such as yes/no and list questions were also excluded.  
-Exploratory data analysis (EDA) was carried out to understand the distribution 
-of the length of sequences in questions, documents, and answers. Detail
-analysis for EDA can be found in a 
-[juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
+Examples such as yes/no and list questions were also excluded. Exploratory data analysis (EDA) 
+was carried out to understand the distribution of the length of sequences in questions, 
+documents, and answers. Same answers appear at multiple places in different sequences 
+with a diverse scenario. 
 
+Detail analysis for EDA can be found in a 
+[juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
 The input for EDA is generated using the following program 
 ```
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
