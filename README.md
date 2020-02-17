@@ -1,5 +1,5 @@
 # MedQA - an automated biomedical question-answer system (Insight Data Science Project)
-Artificial intelligence in the biomedical field aims to ease a task easy and fast. 
+Artificial intelligence in the biomedical field aims to ease a task. 
 One of the time-consuming tasks for biomedical professionals is to read articles. 
 This is because there are already 30M articles published and on average 3,000 new 
 articles/day are published. Second, it takes a few hours to read an article. 
