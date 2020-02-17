@@ -45,7 +45,7 @@ The input for EDA is generated using the following program
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
 
-#### Pre-trained Models 
+#### Pre-trained Model
 Multiple [pre-trained models](https://rajpurkar.github.io/SQuAD-explorer/) are available. 
 Few pre-trained models could be selected for fine-tuning but only 
 [XLNet](https://github.com/zihangdai/xlnet) was chosen due to the time constraint. 
@@ -59,10 +59,11 @@ and pytorch_transformer were used for the downstream task.
 $ test.sh 
 ```
 
-#### Overview 
+#### Summary 
 To build a model, run following command that performs following tasks:
-1. Randomly split the given data into train (90%), valid (5%) and test(5%). 
-2. Two parameters - # of epoch and learing rate are optimized using montecarlo sampling 
+1. Randomly suffle split the given data into train (90%), valid (5%) and test(5%). 
+2. A
+  * Two parameters - # of epoch and learing rate are optimized using montecarlo sampling 
    and selected the best model. 
 
 #### Usage 
