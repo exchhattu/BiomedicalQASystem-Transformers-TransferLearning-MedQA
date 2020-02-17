@@ -60,11 +60,16 @@ $ test.sh
 ```
 
 #### Summary 
-To build a model, run following command that performs following tasks:
-1. Randomly suffle split the given data into train (90%), valid (5%) and test(5%). 
-2. A
-  * Two parameters - # of epoch and learing rate are optimized using montecarlo sampling 
-   and selected the best model. 
+
+To build a model, the following steps were performed:
+1. Randomly shuffle the index of given sequences (not the sequence) and 
+   split it into the train (90%), valid (5%) and test(5%) and repeated 
+   this experiment five times.
+2. Two experiments for training
+    * Two hyperparameters (# of epoch and very-small learning rate (< 0.0003)) are optimized 
+      and Monte carlo sampling to find the best model.
+    * Frooze transformer layers and train the last linear layer only.
+The models are trained at AWS using EC2 instance (p2.xlarge).    
 
 #### Usage 
 ```
@@ -73,35 +78,23 @@ $ ./MedQA.sh
 
 #### Results
 
-Five experiments were carried randomly to avoid biases on data speration and 
-to build a robust model. Furthermore, Monte carlo sampling was used for each experiment 
-to optimize learning rate and number of epoch. Best model with low loss was kept. This model is
-evaluated with test data and here is summary of result. 
+Multiple experiments were carried randomly to avoid biases on data separation and to build a robust model. 
+The best model obtained from fine-tuning the pre-trained model with a small learning rate and epoch is 
+better than freezing entire transformer layers. The model with the best F1 score on validation and the 
+independent dataset was selected for model serving. Here is a summary of the best result. 
 
-* Validation
-
-| Score | Best  | Average | Std. | 
-| ------|------ |:-------:|------| 
-| Exact | 51.58 |    47.82| 2.67 |
-| F1    | 53.32 |    50.46| 2.19 |
-
-* Blind Test
-
-| Score | Best  | Average | Std. | 
-| ------|-------|:-------:|-----:| 
-| Exact | 51.03 |    46.00| 4.39 |
-| F1    | 53.17 |    48.84| 3.81 |
+| Score | validation | Independent | 
+| ------|-----------:|-------------| 
+| F1    | 53.32      |53.17        |
 
 ### Model management and Serving 
-Best model is used for serving. [Flask](https://www.palletsprojects.com/p/flask/), 
+The best model is used for serving. [Flask](https://www.palletsprojects.com/p/flask/), 
 [Nginx](https://www.nginx.com), [gunicorn](https://gunicorn.org), and [AWS](https://aws.amazon.com) 
 are used for serving. Server setup is carried out as suggested in a 
 [link](https://www.e-tinkers.com/2018/08/how-to-properly-host-flask-application-with-nginx-and-guincorn/).
-After completion of server setup, run the following command to start the
-server.  
+After completion of server setup, run the following command to start the server.  
 
 Server side 
-
 ```
 $ cd PATH_TO_WORK_DIR_IN_SERVER # change accordingly 
 $ ./start_server.sh 
@@ -113,11 +106,15 @@ If server runs in AWS, client can request a job
 * Copy http://54.87.194.39 into browser 
 
 ## Challenges:
-* Data - More biomedical and healthcare data are required to train to reduce 
-  variance-bias tradeoff
-* Context dependency - This also requies large amount of data with multiple
-  context to identify the answers in differnt senario. 
+* More data are required for training to reduce variance-bias tradeoff
+* Due to the diversity in tokens dependency of an answer, the following 
+  two cases are necessary to address and for which a large amount of data 
+  is necessary.
+  1. When a question is slightly changed to seeking the same answer, predictions can be different. 
+  2. When the same question is asked in different documents, the answer might be predicted differently. 
 
 ## Futures:
-* Healthcare chatbots 
-* Virtual assistance for healthcare companies
+* First, automate a method to search in the entire document instead of a 
+  small paragraph. Second, it would have a high impact, if the answer can 
+  be provided learning from entire articles.  
+* Transfer a technique to query the doctor's note. 
