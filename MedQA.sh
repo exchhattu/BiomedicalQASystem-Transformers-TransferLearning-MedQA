@@ -1,7 +1,6 @@
 #!/bin/sh
 
-###
-download a dataset 
+### download a dataset 
 
 SQUAD_DIR=`pwd` 
 InputData= #please download and put here a path
