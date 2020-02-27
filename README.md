@@ -86,7 +86,7 @@ independent dataset was selected for model serving. Here is a summary of the bes
 | ------|-----------:|-------------| 
 | F1    | 53.32      |53.17        |
 
-### Model management and Serving 
+### Model Management and Serving 
 The best model is used for serving. [Flask](https://www.palletsprojects.com/p/flask/), 
 [Nginx](https://www.nginx.com), [gunicorn](https://gunicorn.org), and [AWS](https://aws.amazon.com) 
 are used for serving. Server setup is carried out as suggested in a 
