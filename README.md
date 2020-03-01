@@ -40,18 +40,26 @@ documents, and answers. The same answers appear at multiple places in different 
 Detail analysis for EDA can be found in a 
 [juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
 The input for EDA is generated using the following program. However, before running the program, 
-please download the data from the above link and provide the path where data is saved. 
+please download the data from the above link and provide the path in --eda
+parameter. 
 ```
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
 
 #### Pre-trained Model
-Multiple [pre-trained models](https://rajpurkar.github.io/SQuAD-explorer/) are available. 
-Few pre-trained models could be selected for fine-tuning but only 
-[XLNet](https://github.com/zihangdai/xlnet) was chosen due to the time constraint. 
-XLNet was selected among others since it permutes the input sequence to capture the 
-dependency of tokens. [XLnet model](https://arxiv.org/abs/1906.08237) 
-and pytorch_transformer were used for the downstream task. 
+Multiple [pre-trained models](https://rajpurkar.github.io/SQuAD-explorer/) 
+are publicly available. Few pre-trained models could be selected for 
+fine-tuning but only [XLNet](https://github.com/zihangdai/xlnet) was 
+chosen due to the time constraint. XLNet was selected. Although XLNet 
+is an autoregressive model as described in a paper, it is able to see 
+the token from both directions. In addition, it uses Transformer-XL, 
+which includes relative positional encoding and recurrence mechanism 
+to gain the long-distance word relation. Therefore, in addition to content 
+stream attention equivalent to the self-attention layer, query stream attention 
+is also used. [Pytorch implementation](https://huggingface.co/) was used in 
+fine-tuning [XLnet](https://arxiv.org/abs/1906.08237) for the downstream task.  
+Open-source codes were primarily used but modified accordingly. 
+All updated codes were in src directory.
 
 ### Model building 
 #### Unit test
@@ -78,10 +86,20 @@ $ ./MedQA.sh
 
 #### Results
 
-Multiple experiments were carried out randomly to avoid biases on data separation and to build a robust model. 
-The models obtained from fine-tuning the pre-trained model with a small learning rate are generally
-better than freezing entire transformer layers. The model with the best F1 score on validation and the 
-independent dataset was selected for model serving. Here is a summary of the best result. 
+Two approaches were tested to fine-tune the pre-trained model. 
+For each, multiple experiments were carried out randomly to build a 
+robust model. First, the weights of the transformer were unchanged and 
+only optimized the weight of the last layer. 
+This model performed the best F1 score of 27 and 30 on validation and 
+test datasets. The model could not recognize the biological vocabularies 
+precisely and showed a lower F1 score. 
+Therefore, as a second approach, the weights of the transformer were 
+updated with a smaller learning rate to minimize the model being overfitted. 
+This model improved the performance of both datasets as shown below in 
+the table. This is expected since while updating the weight of the 
+pre-trained model with biological knowledge can downgrade the role of 
+the least influence features of it.  The model with the best F1 score on 
+validation and the independent datasets was selected for model serving.
 
 | Score | validation | Independent | 
 | ------|-----------:|-------------| 
