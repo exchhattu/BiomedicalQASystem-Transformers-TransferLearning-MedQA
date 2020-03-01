@@ -50,7 +50,7 @@ $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 Multiple [pre-trained models](https://rajpurkar.github.io/SQuAD-explorer/) 
 are publicly available. Few pre-trained models could be selected for 
 fine-tuning but only [XLNet](https://github.com/zihangdai/xlnet) was 
-chosen due to the time constraint. XLNet was selected. Although XLNet 
+chosen due to the time constraint. Although XLNet 
 is an autoregressive model as described in a paper, it is able to see 
 the token from both directions. In addition, it uses Transformer-XL, 
 which includes relative positional encoding and recurrence mechanism 
