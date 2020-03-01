@@ -57,7 +57,7 @@ which includes relative positional encoding and recurrence mechanism
 to gain the long-distance word relation. Therefore, in addition to content 
 stream attention equivalent to the self-attention layer, query stream attention 
 is also used. [Pytorch implementation](https://huggingface.co/) was used in 
-fine-tuning [XLnet](https://arxiv.org/abs/1906.08237) for the downstream task.  
+fine-tuning [XLnet](https://arxiv.org/abs/1906.08237) for the downstream task.
 Open-source codes were primarily used but modified accordingly. 
 All updated codes were in src directory.
 
