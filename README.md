@@ -39,7 +39,8 @@ documents, and answers. The same answers appear at multiple places in different 
 
 Detail analysis for EDA can be found in a 
 [juypter notebook](https://github.com/exchhattu/MedQA/blob/master/notebook/EDA.ipynb). 
-The input for EDA is generated using the following program 
+The input for EDA is generated using the following program. However, before running the program, 
+please download the data from the above link and provide the path where data is saved. 
 ```
 $ python3 ./src/EDA.py --eda ./data/dataset/curatedBioASQ/
 ```
@@ -77,7 +78,7 @@ $ ./MedQA.sh
 
 #### Results
 
-Multiple experiments were out carried randomly to avoid biases on data separation and to build a robust model. 
+Multiple experiments were carried out randomly to avoid biases on data separation and to build a robust model. 
 The models obtained from fine-tuning the pre-trained model with a small learning rate are generally
 better than freezing entire transformer layers. The model with the best F1 score on validation and the 
 independent dataset was selected for model serving. Here is a summary of the best result. 
